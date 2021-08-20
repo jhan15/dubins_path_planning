@@ -9,7 +9,7 @@
 In this project, we implement a robotic path planning method with [Rapidly exploring Random Tree (RRT)](https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree) algorithm in order to drive a Dubins car, so the path found by the algorithm is drivable by design. We simplify the kinematics for wheeled systems, considering the car as a point
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/129100045-7c7781eb-74a8-4ed0-add7-009af42e6ace.png?raw=true" width="300">
+  <img src="https://github.com/jhan15/dubins_path_planning/blob/master/images/car_model.png?raw=true" width="300">
 </p>
 
 with the dynamics
@@ -56,20 +56,3 @@ $ python3 main.py -case 12 -steps 100 -a # case 12, control steps 100, with anim
 
 ## Results
 
-#### Path
-
-<p align="center">
-  <img src="https://github.com/jhan15/path_planning_dubins/blob/master/images/path.png?raw=true" width="600">
-</p>
-
-#### Branching
-
-<p align="center">
-  <img src="https://github.com/jhan15/path_planning_dubins/blob/master/images/branching.gif?raw=true">
-</p>
-
-#### Complete RRT
-
-<p align="center">
-  <img src="https://github.com/jhan15/path_planning_dubins/blob/master/images/rrt.gif?raw=true">
-</p>
