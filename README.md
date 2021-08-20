@@ -52,3 +52,7 @@ $ python3 main.py
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/130232281-ef374c2a-ce35-4eb3-998e-85b187b85e86.gif?raw=true">
 </p>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/62132206/130233967-58b18097-a9a7-4d06-8713-1d7aa615014e.gif?raw=true">
+</p>
