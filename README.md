@@ -4,9 +4,7 @@
 
 # dubins_path_planning
 
-## Description
-
-In this project, we implement a robotic path planning method with [Rapidly exploring Random Tree (RRT)](https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree) algorithm in order to drive a Dubins car, so the path found by the algorithm is drivable by design. We simplify the kinematics for wheeled systems, considering the car as a point
+In this project, we implemented a car path planning method with [Rapidly exploring Random Tree (RRT)](https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree) algorithm and [Dubins Path](https://en.wikipedia.org/wiki/Dubins_path).
 
 <p align="center">
   <img src="https://github.com/jhan15/dubins_path_planning/blob/master/images/car_model.png?raw=true" width="300">
