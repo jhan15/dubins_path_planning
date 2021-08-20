@@ -47,7 +47,7 @@ $ python3 main.py
   <img src="https://user-images.githubusercontent.com/62132206/130232277-5a4aeed9-d459-45bf-9d42-44f83b29beae.gif?raw=true">
 </p>
 
-#### RRT + Dubins Path
+#### Pathfinding w/ RRT + Dubins Path
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/130232281-ef374c2a-ce35-4eb3-998e-85b187b85e86.gif?raw=true">
