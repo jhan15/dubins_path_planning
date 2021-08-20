@@ -39,7 +39,7 @@ $ python3 dubins_path.py
 $ python3 main.py
 ```
 
-## Results
+## Functions
 
 #### Shortest obstacle-free Dubins Path
 
