@@ -32,7 +32,7 @@ The control variable is:
 $ git clone https://github.com/jhan15/dubins_path_planning.git
 $ cd dubins_path_planning
 
-# dubins path only
+# demonstrate dubins path
 $ python3 dubins_path.py
 
 # path finding with RRT + Dubins Path
