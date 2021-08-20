@@ -18,38 +18,25 @@ y[t+1]     = y[t]     + sin(theta[t])
 theta[t+1] = theta[t] + tan(phi[t]) / L
 ```
 
-from an initial position `(x0,y0)` to a target position `(xt, yt)`, while avoiding both collisions with obstacles and venturing out of bounds.
-
 The state variables are:
  - `x`: horizontal position
  - `y`: vertical position
  - `theta`: heading angle (direction of travel)
 
-And, the sole control variable is the steering angle `phi ∈ [-pi/4, pi/4]` (with respect to the direction of travel).
-
-We consider two types of obstacles:
- - **Circular** — reach the target position with circular obstacles;
- - **Line** — reach the target position with line obstacles.
-
-**Note**:
-- we refer to the *state* as `(x, y, theta)` and the *position* as `(x, y)`;
-- the line obstacles are represented by a series of circular obstacles;
-- the initial and target positions are randomised;
-- the integration will stop if the path goes into an obstacle, out of bounds, or within 0.2 meters of the target;
-- each steering angle `controls[i]` is considered to be constant between `times[i]` and `times[i+1]`, so `controls` must be one element shorter than `times`, i.e. `len(controls) == len(times) - 1`;
-- the initial time must be zero, i.e. `times[0] == 0`;
-- the time list must be spaced by `≥0.01` seconds;
-- each steering angle must be admissible, i.e. `-pi/4 <= controls[i] <= pi/4`;
-- the time sequence must increase, i.e. `times[i+1] > times[i]`;
-- the intial heading angle in evaluation is zero, i.e. `theta=0`.
+The control variable is:
+ - `phi`: steering angle, `phi ∈ [-pi/4, pi/4]` (with respect to the direction of travel).
 
 ## Usage
 
 ```bash
-$ git clone https://github.com/jhan15/path_planning_dubins.git
-$ cd path_planning_dubins
-$ python3 main.py -case 12 -steps 100 -a # case 12, control steps 100, with animation
-                                         # 0 <= case <= 12
+$ git clone https://github.com/jhan15/dubins_path_planning.git
+$ cd dubins_path_planning
+
+# dubins path only
+$ python3 dubins_path.py
+
+# path finding with RRT + Dubins Path
+$ python3 main.py
 ```
 
 ## Results
