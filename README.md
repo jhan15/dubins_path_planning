@@ -35,7 +35,7 @@ $ cd dubins_path_planning
 # demonstrate dubins path
 $ python3 dubins_path.py
 
-# path finding with RRT + Dubins Path
+# pathfinding with RRT + Dubins Path
 $ python3 main.py
 ```
 
