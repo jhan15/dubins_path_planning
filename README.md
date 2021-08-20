@@ -15,7 +15,7 @@ with the dynamics
 ```python
 x[t+1]     = x[t]     + cos(theta[t])
 y[t+1]     = y[t]     + sin(theta[t])
-theta[t+1] = theta[t] + tan(phi[t])
+theta[t+1] = theta[t] + tan(phi[t]) / L
 ```
 
 from an initial position `(x0,y0)` to a target position `(xt, yt)`, while avoiding both collisions with obstacles and venturing out of bounds.
