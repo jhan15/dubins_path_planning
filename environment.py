@@ -2,6 +2,7 @@ from obstacle import Obstacle
 
 
 class Environment:
+    """ The map configuration. """
 
     def __init__(self, obs=None):
 
@@ -14,15 +15,13 @@ class Environment:
             self.initialize_obs()
     
     def initialize_obs(self):
+        """ Initialize the obstacles. """
 
-        ob1 = Obstacle(5, 4, 0.5, 6)
-        ob2 = Obstacle(10, 0, 0.5, 6)
-        ob3 = Obstacle(3, 3.5, 1, 1)
-        ob4 = Obstacle(5, 5.5, 1, 1)
-        ob5 = Obstacle(4, 4.5, 1, 1)
-        self.obs = [ob3, ob4, ob5]
+        ob1 = Obstacle(self.lx/2, self.ly/2, 1, 1)
+        self.obs = [ob1]
     
     def inbounds(self, car_vertex, safe_dis=0.1):
+        """ Check car within the map bounds. """
 
         for v in car_vertex:
             if v[0] < safe_dis:
@@ -37,6 +36,7 @@ class Environment:
         return True
 
     def obstacle_free(self, car_vertex):
+        """ Check car is obstacle-free or not. """
 
         for ob in self.obs:
             if not ob.safe(car_vertex):
@@ -45,6 +45,7 @@ class Environment:
         return True
 
     def safe(self, car_vertex):
+        """ Check car is safe or not. """
 
         if self.inbounds(car_vertex) and self.obstacle_free(car_vertex):
             return True

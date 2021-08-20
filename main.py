@@ -6,28 +6,36 @@ import matplotlib.animation as animation
 
 from car import SimpleCar
 from environment import Environment
+from test_cases.cases import TestCase
 from rrt import RRT
 from utils.utils import plot_a_car
 
 
 def main():
 
-    env = Environment()
+    # test cases
+    tc = TestCase()
 
-    start_pos = [6.5, 2, 1.3*pi]
-    end_pos = [3, 7.5, -pi/5]
-    car = SimpleCar(env, start_pos, end_pos)
+    # map w/ obstacles
+    env = Environment(tc.obs3)
+
+    # car w/ initial and target poses
+    car = SimpleCar(env, tc.start_pos, tc.end_pos)
+
+    # RRT + Dubins path
+    rrt = RRT(car)
+
+    # pathfinding
+    controls = rrt.search_path()
+    path = car.get_path(controls)
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
-
-    rrt = RRT(car)
-
-    controls = rrt.search_path()
-    path = car.get_path(controls)
+    
     xl = [state['pos'][0] for state in path]
     yl = [state['pos'][1] for state in path]
 
+    # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
     ax.set_xlim(0, env.lx)
     ax.set_ylim(0, env.ly)

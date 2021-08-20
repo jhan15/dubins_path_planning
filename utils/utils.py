@@ -4,6 +4,7 @@ import numpy as np
 
 
 def transform(x, y, w, l, theta, id):
+    """ Coordinates transform. """
 
     if id == 1:
         x_ = x + w*cos(theta) - l*sin(theta)
@@ -30,6 +31,7 @@ def plot_a_car(ax, state):
 
 
 def calculate_arc_len(vec1, vec2, d, r):
+    """ Calculate the arc length of specified rotation direction. """
     
     theta = atan2(vec2[1], vec2[0]) - atan2(vec1[1], vec1[0])
 

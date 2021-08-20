@@ -4,6 +4,7 @@ from dubins_path import DubinsPath
 
 
 class Node:
+    """ RRT tree node. """
 
     def __init__(self, pos, phi=0, steps=0, dt=1e-2):
 
@@ -15,6 +16,7 @@ class Node:
 
 
 class SimpleState:
+    """ Hash function for tree nodes. """
 
     def __init__(self, node):
 
@@ -36,6 +38,7 @@ class SimpleState:
 
 
 class RRT:
+    """ RRT + Dubins path algorithms. """
 
     def __init__(self, car, max_steps=50):
 
@@ -49,12 +52,14 @@ class RRT:
         self.dubins = DubinsPath(self.car)
     
     def get_nearest_node(self, nodes, pick):
+        """ Get the nearest node of a random pick. """
 
         d_2 = [(node.pos[0]-pick[0])**2 + (node.pos[1]-pick[1])**2 for node in nodes]
         
         return nodes[d_2.index(min(d_2))]
     
     def get_steering_angle(self, pos, pick):
+        """ Calculate steering angle. """
 
         v = [cos(pos[2]), sin(pos[2])]
         r = [pick[0] - pos[0], pick[1] - pos[1]]
@@ -68,8 +73,9 @@ class RRT:
         return phi
     
     def search_path(self):
+        """ Search path, return controls. """
 
-        # check dubins path
+        # check dubins path for start and target
         solutions = self.dubins.find_tangents(self.start.pos, self.goal.pos)
         dubins_controls = self.dubins.best_tangent(solutions)
         
@@ -117,7 +123,7 @@ class RRT:
             new_node.parent = nearest
             nodes.append(new_node)
 
-            # check dubins path
+            # check dubins path of new node
             solutions = self.dubins.find_tangents(pos, self.goal.pos)
             dubins_controls = self.dubins.best_tangent(solutions)
             

@@ -2,6 +2,7 @@ from shapely.geometry import Polygon
 
 
 class Obstacle:
+    """ Rectangle obstacles. """
 
     def __init__(self, x, y, w, h):
 
@@ -11,6 +12,7 @@ class Obstacle:
         self.h = float(h)
     
     def safe(self, car_vertex, safe_dis=0.1):
+        """ Check a car state is intersected with an obstacle or not. """
 
         car = Polygon(car_vertex)
         obs = Polygon([(self.x-safe_dis, self.y-safe_dis),

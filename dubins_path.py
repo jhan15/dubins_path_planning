@@ -7,10 +7,12 @@ import matplotlib.animation as animation
 
 from car import SimpleCar
 from environment import Environment
+from test_cases.cases import TestCase
 from utils.utils import transform, calculate_arc_len, same_point, plot_a_car
 
 
 class Params:
+    """ Store parameters for different dubins paths. """
 
     def __init__(self, d):
 
@@ -21,64 +23,28 @@ class Params:
 
 
 class DubinsPath:
+    """
+    Consider four dubins paths
+    - LSL
+    - LSR
+    - RSL
+    - RSR
+    and find the shortest obstacle-free one.
+    To achieve a reasonable accuracy, set dt=1e-4.
+    """
 
     def __init__(self, car):
 
         self.car = car
         self.r = self.car.l / tan(self.car.max_phi)
         
+        # turn left: 1, turn right: -1
         self.direction = {
             'RSL': [-1, 1],
             'LSL': [1, 1],
             'LSR': [1, -1],
             'RSR': [-1, -1]
         }
-    
-    def find_tangents(self, start_pos, end_pos):
-
-        self.start_pos = start_pos
-        self.end_pos = end_pos
-
-        x1, y1, theta1 = start_pos
-        x2, y2, theta2 = end_pos
-        self.s = np.array(start_pos[:2])
-        self.e = np.array(end_pos[:2])
-        self.lc1 = transform(x1, y1, 0, self.r, theta1, 1)
-        self.rc1 = transform(x1, y1, 0, self.r, theta1, 2)
-        self.lc2 = transform(x2, y2, 0, self.r, theta2, 1)
-        self.rc2 = transform(x2, y2, 0, self.r, theta2, 2)
-        
-        solutions = [self._RSL(), self._LSL(), self._LSR(), self._RSR()]
-        solutions.sort(key=lambda x: x.path_len, reverse=False)
-        
-        return solutions
-    
-    def best_tangent(self, solutions):
-
-        for s in solutions:
-            controls, safe = self.get_dubins_controls(s)
-            if safe:
-                break
-        
-        if not safe:
-            return None
-        
-        return controls
-    
-    def _RSL(self):
-
-        rsl = Params(self.direction['RSL'])
-
-        cline = self.lc2 - self.rc1
-        R = np.linalg.norm(cline) / 2
-        theta = atan2(cline[1], cline[0]) + acos(self.r/R)
-
-        rsl.t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
-        rsl.t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta+pi, 1)
-
-        rsl.path_len = self.path_length(rsl.d, self.rc1, self.lc2, rsl.t1, rsl.t2)
-
-        return rsl
     
     def _LSL(self):
 
@@ -94,7 +60,7 @@ class DubinsPath:
         lsl.path_len = self.path_length(lsl.d, self.lc1, self.lc2, lsl.t1, lsl.t2)
 
         return lsl
-    
+
     def _LSR(self):
 
         lsr = Params(self.direction['LSR'])
@@ -109,7 +75,22 @@ class DubinsPath:
         lsr.path_len = self.path_length(lsr.d, self.lc1, self.rc2, lsr.t1, lsr.t2)
 
         return lsr
-    
+
+    def _RSL(self):
+
+        rsl = Params(self.direction['RSL'])
+
+        cline = self.lc2 - self.rc1
+        R = np.linalg.norm(cline) / 2
+        theta = atan2(cline[1], cline[0]) + acos(self.r/R)
+
+        rsl.t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
+        rsl.t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta+pi, 1)
+
+        rsl.path_len = self.path_length(rsl.d, self.rc1, self.lc2, rsl.t1, rsl.t2)
+
+        return rsl
+
     def _RSR(self):
 
         rsr = Params(self.direction['RSR'])
@@ -125,7 +106,41 @@ class DubinsPath:
 
         return rsr
     
+    def find_tangents(self, start_pos, end_pos):
+        """ Find the tangents of four dubins paths. """
+
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+
+        x1, y1, theta1 = start_pos
+        x2, y2, theta2 = end_pos
+        self.s = np.array(start_pos[:2])
+        self.e = np.array(end_pos[:2])
+        self.lc1 = transform(x1, y1, 0, self.r, theta1, 1)
+        self.rc1 = transform(x1, y1, 0, self.r, theta1, 2)
+        self.lc2 = transform(x2, y2, 0, self.r, theta2, 1)
+        self.rc2 = transform(x2, y2, 0, self.r, theta2, 2)
+        
+        solutions = [self._LSL(), self._LSR(), self._RSL(), self._RSR()]
+        solutions.sort(key=lambda x: x.path_len, reverse=False)
+        
+        return solutions
+    
+    def best_tangent(self, solutions):
+        """ Get the controls of the shortest obstacle-free dubins path. """
+
+        for s in solutions:
+            controls, safe = self.get_dubins_controls(s)
+            if safe:
+                break
+        
+        if not safe:
+            return None
+        
+        return controls
+    
     def path_length(self, d, c1, c2, t1, t2):
+        """ Calculate the dubins path length. """
         
         v1 = self.s - c1
         v2 = t1     - c1
@@ -142,6 +157,7 @@ class DubinsPath:
         return total
     
     def get_dubins_controls(self, s, dt=1e-4):
+        """ Get the controls to visit a dubins path. """
 
         safe = True
         controls = []
@@ -166,6 +182,7 @@ class DubinsPath:
         return controls, safe
 
     def get_steps(self, pos, phi, goal, h, dt):
+        """ Count the steps to a goal for a steering angle. """
 
         at_goal = False
         freq = int(1e-2 / dt)
@@ -189,32 +206,37 @@ class DubinsPath:
 
 def main():
 
-    obs = [[3, 3.5, 1, 1], [5, 5.5, 1, 1]]
-    env = Environment(obs)
+    # test cases
+    tc = TestCase()
 
-    start_pos = [6.5, 2, 1.3*pi]
-    end_pos = [3, 7.5, -pi/5]
-    car = SimpleCar(env, start_pos, end_pos)
+    # map w/ obstacles
+    env = Environment(tc.obs1)
+
+    # car w/ initial and target poses
+    car = SimpleCar(env, tc.start_pos, tc.end_pos)
+
+    # dubins path
+    dubins = DubinsPath(car)
+
+    # shortest obstacle-free dubins path
+    solutions = dubins.find_tangents(car.start_pos, car.end_pos)
+    controls = dubins.best_tangent(solutions)
+    path = car.get_path(controls)
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
 
-    dubins = DubinsPath(car)
-    solutions = dubins.find_tangents(start_pos, end_pos)
-
     tangents = []
     for s in solutions:
         tangents.append([s.t1, s.t2])
-    lc = LineCollection(tangents, color=['b','m','b','m'])
+    lc = LineCollection(tangents, color='b')
     
     lcircle1 = plt.Circle(dubins.lc1, dubins.r, fc='None', ec='k')
     rcircle1 = plt.Circle(dubins.rc1, dubins.r, fc='None', ec='k')
     lcircle2 = plt.Circle(dubins.lc2, dubins.r, fc='None', ec='k')
     rcircle2 = plt.Circle(dubins.rc2, dubins.r, fc='None', ec='k')
 
-    controls = dubins.best_tangent(solutions)
-    path = car.get_path(controls)
-
+    # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
     ax.set_xlim(0, env.lx)
     ax.set_ylim(0, env.ly)

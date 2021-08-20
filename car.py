@@ -5,6 +5,7 @@ from utils.utils import transform
 
 
 class SimpleCar:
+    """ Car model and functions. """
 
     def __init__(self, env, start_pos=None, end_pos=None, l=0.5, max_phi=pi/4):
 
@@ -29,6 +30,7 @@ class SimpleCar:
             self.end_pos = self.random_pos()
     
     def random_pos(self):
+        """ Generate a random pos. """
         
         while True:
             x = uniform(self.env.lx*0.1, self.env.lx*0.9)
@@ -44,6 +46,7 @@ class SimpleCar:
         return pos
     
     def get_car_state(self, pos, phi=0):
+        """ Get the car state according to the pos and steering angle. """
 
         x, y, theta = pos
 
@@ -77,6 +80,7 @@ class SimpleCar:
         return state
     
     def step(self, pos, phi, dt=1e-2):
+        """ Car dynamics. """
 
         x, y, theta = pos
         dx     = cos(theta)
@@ -89,16 +93,8 @@ class SimpleCar:
 
         return [x, y, theta]
     
-    def reach_target(self, pos, h=0.1):
-
-        if abs(pos[0] - self.end_pos[0]) > h:
-            return False
-        if abs(pos[1] - self.end_pos[1]) > h:
-            return False
-        
-        return True
-    
     def get_path(self, controls):
+        """ Generate driving path according to control inputs. """
         
         path = []
         pos = self.start_pos
