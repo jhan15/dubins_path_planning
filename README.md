@@ -44,15 +44,15 @@ $ python3 main.py
 #### Shortest obstacle-free Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130232277-5a4aeed9-d459-45bf-9d42-44f83b29beae.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/130370520-6dc13d58-a00a-4e4b-97c5-effb28fcbde9.gif?raw=true">
 </p>
 
 #### Pathfinding w/ RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130232281-ef374c2a-ce35-4eb3-998e-85b187b85e86.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/130370521-9a6e3053-82a4-4cea-b12b-706413a4de64.gif?raw=true">
 </p>
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130233967-58b18097-a9a7-4d06-8713-1d7aa615014e.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/130370524-b521f733-8c90-4ae3-b95f-6e209ca0123e.gif?raw=true">
 </p>
