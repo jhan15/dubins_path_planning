@@ -17,7 +17,7 @@ def main():
     tc = TestCase()
 
     # map w/ obstacles
-    env = Environment(tc.obs3)
+    env = Environment(tc.obs2)
 
     # car w/ initial and target poses
     car = SimpleCar(env, tc.start_pos, tc.end_pos)

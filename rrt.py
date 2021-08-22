@@ -1,5 +1,5 @@
 import numpy as np
-from math import sin, cos
+from math import sin, atan2, atan
 from dubins_path import DubinsPath
 
 
@@ -61,12 +61,14 @@ class RRT:
     def get_steering_angle(self, pos, pick):
         """ Calculate steering angle. """
 
-        v = [cos(pos[2]), sin(pos[2])]
-        r = [pick[0] - pos[0], pick[1] - pos[1]]
-
-        cross = np.cross(v, r)
-        dot = np.dot(v, r)
-        phi = np.arctan2(cross, dot)
+        v1 = np.array(pos[:2])
+        v2 = np.array(pick)
+        vb = v2 - v1
+        
+        b = np.linalg.norm(vb)
+        lamda = atan2(vb[1], vb[0])
+    
+        phi = atan(2*self.car.l*sin(lamda-pos[2])/b)
 
         phi = max(min(phi, self.car.max_phi), -self.car.max_phi)
         
