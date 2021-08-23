@@ -47,11 +47,11 @@ $ python3 main.py
 #### Shortest obstacle-free Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130496974-a36ccf19-6248-405c-a7fe-b19d86ef798f.gif?raw=true" width="400">
+  <img src="https://user-images.githubusercontent.com/62132206/130496974-a36ccf19-6248-405c-a7fe-b19d86ef798f.gif?raw=true" width="500">
 </p>
 
 #### Pathfinding w/ RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130496983-a1f88c80-8993-43db-9533-0cc72c060139.gif?raw=true" width="400">
+  <img src="https://user-images.githubusercontent.com/62132206/130496983-a1f88c80-8993-43db-9533-0cc72c060139.gif?raw=true" width="500">
 </p>
