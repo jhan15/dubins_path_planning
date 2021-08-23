@@ -93,11 +93,10 @@ class SimpleCar:
 
         return [x, y, theta]
     
-    def get_path(self, controls):
+    def get_path(self, pos, controls):
         """ Generate driving path according to control inputs. """
         
         path = []
-        pos = self.start_pos
         
         count = 0
         for phi, steps, dt in controls:

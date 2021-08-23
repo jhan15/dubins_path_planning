@@ -27,7 +27,7 @@ def main():
 
     # pathfinding
     controls = rrt.search_path()
-    path = car.get_path(controls)
+    path = car.get_path(car.start_pos, controls)
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
