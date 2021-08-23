@@ -55,3 +55,8 @@ def same_point(pt1, pt2, h=1e-3):
     d = distance(pt1, pt2)
 
     return d < h
+
+
+def mod_angle(angle):
+
+    return angle % (2*pi)
