@@ -12,13 +12,7 @@ class Environment:
         if obs:
             self.obs = [Obstacle(*ob) for ob in obs]
         else:
-            self.initialize_obs()
-    
-    def initialize_obs(self):
-        """ Initialize the obstacles. """
-
-        ob1 = Obstacle(self.lx/2, self.ly/2, 1, 1)
-        self.obs = [ob1]
+            self.obs = []
     
     def inbounds(self, car_vertex, safe_dis=0.1):
         """ Check car within the map bounds. """

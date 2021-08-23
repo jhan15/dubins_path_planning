@@ -223,13 +223,16 @@ def main():
     controls = dubins.best_tangent(solutions)
     path = car.get_path(car.start_pos, controls)
 
-    start_state = car.get_car_state(car.start_pos)
+    carl = []
+    for i in range(len(path)):
+        carl.append(path[i]['model'][0])
+
     end_state = car.get_car_state(car.end_pos)
 
     tangents = []
     for s in solutions:
         tangents.append([s.t1, s.t2])
-    lc = LineCollection(tangents, color='b', linewidth=1)
+    lc = LineCollection(tangents, color='k', linewidth=1)
     
     lcircle1 = plt.Circle(dubins.lc1, dubins.r, fc='None', ec='k')
     rcircle1 = plt.Circle(dubins.rc1, dubins.r, fc='None', ec='k')
@@ -253,7 +256,6 @@ def main():
     ax.add_patch(lcircle2)
     ax.add_patch(rcircle2)
     
-    ax = plot_a_car(ax, start_state['model'])
     ax = plot_a_car(ax, end_state['model'])
 
     _carl = PatchCollection([])
@@ -264,12 +266,10 @@ def main():
 
     def animate(i):
 
-        carl = []
-        for j in range(0, min(i, len(path)-1), 25):
-            carl.append(path[j]['model'][0])
-        _carl.set_paths(carl)
-        _carl.set_edgecolor('None')
-        _carl.set_facecolor('b')
+        sub_carl = carl[:min(i+1, len(path))]
+        _carl.set_paths(sub_carl[::10])
+        _carl.set_edgecolor('m')
+        _carl.set_facecolor('None')
         _carl.set_alpha(0.2)
 
         edgecolor = ['k']*5 + ['r']
@@ -277,11 +277,12 @@ def main():
         _car.set_paths(path[min(i, len(path)-1)]['model'])
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
+        _car.set_zorder(3)
 
         return _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
-                                  repeat=True, blit=True)
+                                  repeat=False, blit=True)
 
     plt.show()
 

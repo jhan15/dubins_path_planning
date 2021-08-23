@@ -1,4 +1,3 @@
-from math import pi
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -29,7 +28,13 @@ def main():
     controls = rrt.search_path()
     path = car.get_path(car.start_pos, controls)
 
-    start_state = car.get_car_state(car.start_pos)
+    xl, yl = [], []
+    carl = []
+    for i in range(len(path)):
+        xl.append(path[i]['pos'][0])
+        yl.append(path[i]['pos'][1])
+        carl.append(path[i]['model'][0])
+
     end_state = car.get_car_state(car.end_pos)
 
     # plot and annimation
@@ -43,7 +48,6 @@ def main():
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
-    ax = plot_a_car(ax, start_state['model'])
     ax = plot_a_car(ax, end_state['model'])
 
     _path, = ax.plot([], [], color='lime', linewidth=1)
@@ -56,18 +60,12 @@ def main():
 
     def animate(i):
 
-        xl, yl = [], []
-        for j in range(min(i, len(path)-1), len(path)):
-            xl.append(path[j]['pos'][0])
-            yl.append(path[j]['pos'][1])
-        _path.set_data(xl, yl)
+        _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
 
-        carl = []
-        for j in range(0, min(i, len(path)-1), 25):
-            carl.append(path[j]['model'][0])
-        _carl.set_paths(carl)
-        _carl.set_edgecolor('None')
-        _carl.set_facecolor('b')
+        sub_carl = carl[:min(i+1, len(path))]
+        _carl.set_paths(sub_carl[::10])
+        _carl.set_edgecolor('m')
+        _carl.set_facecolor('None')
         _carl.set_alpha(0.2)
 
         edgecolor = ['k']*5 + ['r']
@@ -75,11 +73,12 @@ def main():
         _car.set_paths(path[min(i, len(path)-1)]['model'])
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
+        _car.set_zorder(3)
 
         return _path, _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
-                                  repeat=True, blit=True)
+                                  repeat=False, blit=True)
 
     plt.show()
 
