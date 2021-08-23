@@ -40,11 +40,12 @@ class SimpleState:
 class RRT:
     """ RRT + Dubins path algorithms. """
 
-    def __init__(self, car, max_steps=50):
+    def __init__(self, car, max_steps=50, pick_target_freq=10, check_dubins_freq=5):
 
         self.car = car
         self.max_steps = max_steps
-        self.pick_target_freq = 10
+        self.pick_target_freq = pick_target_freq
+        self.check_dubins_freq = check_dubins_freq
 
         self.start = Node(self.car.start_pos)
         self.goal = Node(self.car.end_pos)
@@ -126,12 +127,13 @@ class RRT:
             nodes.append(new_node)
 
             # check dubins path of new node
-            solutions = self.dubins.find_tangents(pos, self.goal.pos)
-            dubins_controls = self.dubins.best_tangent(solutions)
-            
-            if dubins_controls:
-                final_node = new_node
-                break
+            if count % self.check_dubins_freq == 0:
+                solutions = self.dubins.find_tangents(pos, self.goal.pos)
+                dubins_controls = self.dubins.best_tangent(solutions)
+                
+                if dubins_controls:
+                    final_node = new_node
+                    break
         
         current = final_node
         while current.parent:

@@ -17,7 +17,7 @@ def main():
     tc = TestCase()
 
     # map w/ obstacles
-    env = Environment(tc.obs2)
+    env = Environment(tc.obs3)
 
     # car w/ initial and target poses
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
@@ -31,9 +31,6 @@ def main():
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
-    
-    xl = [state['pos'][0] for state in path]
-    yl = [state['pos'][1] for state in path]
 
     # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
@@ -46,22 +43,32 @@ def main():
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
-    ax = plot_a_car(ax, start_state)
-    ax = plot_a_car(ax, end_state)
-    ax.plot(xl, yl, color='lime', linewidth=1)
+    ax = plot_a_car(ax, start_state['model'])
+    ax = plot_a_car(ax, end_state['model'])
 
-    _path, = ax.plot([], [], color='g', linewidth=3)
+    _path, = ax.plot([], [], color='lime', linewidth=1)
+    _carl = PatchCollection([])
+    ax.add_collection(_carl)
     _car = PatchCollection([])
     ax.add_collection(_car)
+    
     frames = len(path) + 1
 
     def animate(i):
 
         xl, yl = [], []
-        for j in range(min(i+1, len(path))):
+        for j in range(min(i, len(path)-1), len(path)):
             xl.append(path[j]['pos'][0])
             yl.append(path[j]['pos'][1])
         _path.set_data(xl, yl)
+
+        carl = []
+        for j in range(0, min(i, len(path)-1), 25):
+            carl.append(path[j]['model'][0])
+        _carl.set_paths(carl)
+        _carl.set_edgecolor('None')
+        _carl.set_facecolor('b')
+        _carl.set_alpha(0.2)
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
@@ -69,7 +76,7 @@ def main():
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
 
-        return _path, _car
+        return _path, _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
                                   repeat=True, blit=True)

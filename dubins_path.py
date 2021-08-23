@@ -221,7 +221,7 @@ def main():
     # shortest obstacle-free dubins path
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
     controls = dubins.best_tangent(solutions)
-    path = car.get_path(controls)
+    path = car.get_path(car.start_pos, controls)
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
@@ -229,7 +229,7 @@ def main():
     tangents = []
     for s in solutions:
         tangents.append([s.t1, s.t2])
-    lc = LineCollection(tangents, color='b')
+    lc = LineCollection(tangents, color='b', linewidth=1)
     
     lcircle1 = plt.Circle(dubins.lc1, dubins.r, fc='None', ec='k')
     rcircle1 = plt.Circle(dubins.rc1, dubins.r, fc='None', ec='k')
@@ -253,21 +253,24 @@ def main():
     ax.add_patch(lcircle2)
     ax.add_patch(rcircle2)
     
-    ax = plot_a_car(ax, start_state)
-    ax = plot_a_car(ax, end_state)
+    ax = plot_a_car(ax, start_state['model'])
+    ax = plot_a_car(ax, end_state['model'])
 
-    _path, = ax.plot([], [], color='g', linewidth=3)
+    _carl = PatchCollection([])
+    ax.add_collection(_carl)
     _car = PatchCollection([])
     ax.add_collection(_car)
     frames = len(path) + 1
 
     def animate(i):
 
-        xl, yl = [], []
-        for j in range(min(i+1, len(path))):
-            xl.append(path[j]['pos'][0])
-            yl.append(path[j]['pos'][1])
-        _path.set_data(xl, yl)
+        carl = []
+        for j in range(0, min(i, len(path)-1), 25):
+            carl.append(path[j]['model'][0])
+        _carl.set_paths(carl)
+        _carl.set_edgecolor('None')
+        _carl.set_facecolor('b')
+        _carl.set_alpha(0.2)
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
@@ -275,7 +278,7 @@ def main():
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
 
-        return _path, _car
+        return _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
                                   repeat=True, blit=True)

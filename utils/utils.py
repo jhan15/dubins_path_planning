@@ -22,9 +22,9 @@ def transform(x, y, w, l, theta, id):
     return np.array([x_, y_])
 
 
-def plot_a_car(ax, state):
+def plot_a_car(ax, model):
 
-    pc = PatchCollection(state['model'], match_original=True)
+    pc = PatchCollection(model, match_original=True)
     ax.add_collection(pc)
 
     return ax
