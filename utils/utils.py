@@ -43,8 +43,15 @@ def calculate_arc_len(vec1, vec2, d, r):
     return abs(theta*r)
 
 
+def distance(pt1, pt2):
+    
+    d = sqrt((pt1[0]-pt2[0])**2 + (pt1[1]-pt2[1])**2)
+
+    return d
+
+
 def same_point(pt1, pt2, h=1e-3):
 
-    d = sqrt((pt1[0]-pt2[0])**2 + (pt1[1]-pt2[1])**2)
+    d = distance(pt1, pt2)
 
     return d < h

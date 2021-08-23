@@ -5,7 +5,7 @@ from itertools import product
 class Grid:
     """ Grid configuration. """
 
-    def __init__(self, env, grid_size=0.5):
+    def __init__(self, env, grid_size=0.2):
 
         self.env = env
         self.grid_size = grid_size
@@ -18,10 +18,10 @@ class Grid:
 
         return [(i, j) for i, j in product(range(m), range(n))]
     
-    def grid_id(self, x):
+    def grid_id(self, pos):
         """" Convert pose into grid index. """
 
-        x = np.array(x)
-        x_grid = np.floor(x / self.grid_size)
+        pos = np.array(pos)
+        pos_grid = np.floor(pos / self.grid_size)
 
-        return x_grid
+        return pos_grid

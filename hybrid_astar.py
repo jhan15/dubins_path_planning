@@ -5,16 +5,18 @@ from car import SimpleCar
 from environment import Environment
 from dubins_path import DubinsPath
 from test_cases.cases import TestCase
+from utils.utils import distance
 
 
 class Node:
     """ Hybrid A* tree node. """
 
-    def __init__(self, x_grid, theta, x):
+    def __init__(self, pos_grid, theta, pos):
 
-        self.x_grid = x_grid
+        self.pos_grid = pos_grid
         self.theta = theta
-        self.x = x
+
+        self.pos = pos
         self.g = None
         self.f = None
         self.parent = None
@@ -25,17 +27,17 @@ class SimpleState:
 
     def __init__(self, node):
 
-        self.x_grid = node.x_grid
+        self.pos_grid = node.pos_grid
         self.theta = node.theta
     
     def __eq__(self, other):
 
-        return (self.x_grid == other.x_grid \
+        return (self.pos_grid == other.pos_grid \
             and self.theta == other.theta)
     
     def __hash__(self):
 
-        return hash((self.x_grid, self.theta))
+        return hash((self.pos_grid, self.theta))
     
 
 class HybridAstar:
@@ -46,9 +48,14 @@ class HybridAstar:
         self.car = car
         self.grid = grid
         self.theta_step = theta_step
+
+        self.start = self.car.start_pos
+        self.goal = self.car.end_pos
+
         self.get_discretized_thetas()
     
     def get_discretized_thetas(self):
+        """ Get all discretized headings in one grid. """
 
         self.thetas = [0]
         while True:
@@ -57,6 +64,18 @@ class HybridAstar:
                 break
             
             self.thetas.append(theta)
+    
+    def search_path(self):
+        """ Hybrid A* pathfinding. """
+
+    
+    def heuristic_cost(self, pos):
+        """ Heuristic for remaining cost estimation. """
+        
+        return distance(pos, self.goal[:2])
+
+    def get_path_length(self):
+        pass
 
 
 def main():

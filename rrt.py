@@ -1,6 +1,8 @@
 import numpy as np
 from math import sin, atan2, atan
+
 from dubins_path import DubinsPath
+from utils.utils import distance
 
 
 class Node:
@@ -55,9 +57,9 @@ class RRT:
     def get_nearest_node(self, nodes, pick):
         """ Get the nearest node of a random pick. """
 
-        d_2 = [(node.pos[0]-pick[0])**2 + (node.pos[1]-pick[1])**2 for node in nodes]
+        dl = [distance(node.pos[:2], pick) for node in nodes]
         
-        return nodes[d_2.index(min(d_2))]
+        return nodes[dl.index(min(dl))]
     
     def get_steering_angle(self, pos, pick):
         """ Calculate steering angle. """
@@ -70,7 +72,6 @@ class RRT:
         lamda = atan2(vb[1], vb[0])
     
         phi = atan(2*self.car.l*sin(lamda-pos[2])/b)
-
         phi = max(min(phi, self.car.max_phi), -self.car.max_phi)
         
         return phi
