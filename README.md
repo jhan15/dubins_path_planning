@@ -32,10 +32,13 @@ The control variable is:
 $ git clone https://github.com/jhan15/dubins_path_planning.git
 $ cd dubins_path_planning
 
-# demonstrate dubins path
+# demonstarte car dynamics
+$ python3 car.py
+
+# demonstrate dubins path (shortest obstacle-free)
 $ python3 dubins_path.py
 
-# pathfinding with RRT + Dubins Path
+# pathfinding with RRT + Dubins Path (final shot)
 $ python3 main.py
 ```
 
