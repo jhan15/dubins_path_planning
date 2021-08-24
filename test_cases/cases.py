@@ -6,8 +6,8 @@ class TestCase:
 
     def __init__(self):
 
-        self.start_pos = [6.5, 2, 1.3*pi]
-        self.end_pos = [3, 7.5, -pi/5]
+        self.start_pos = [6.2, 2.3, 1.3*pi]
+        self.end_pos = [2.9, 7.6, -pi/5]
 
         self.obs1 = [
             [3, 3.5, 1, 1],
@@ -21,6 +21,6 @@ class TestCase:
         ]
 
         self.obs3 = [
-            [0, 6.1, 6, 0.3],
-            [4, 3.1, 6, 0.3]
+            [0, 6.1, 6, 0.5],
+            [4, 3.1, 6, 0.5]
         ]

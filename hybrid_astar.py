@@ -1,4 +1,4 @@
-from math import pi, radians
+from math import pi, tan, sin
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -10,25 +10,20 @@ from car import SimpleCar
 from environment import Environment
 from dubins_path import DubinsPath
 from test_cases.cases import TestCase
-from utils.utils import distance, plot_a_car, mod_angle
+from utils.utils import distance, plot_a_car, mod_angle, arc_length
 
 
 class Node:
     """ Hybrid A* tree node. """
 
-    def __init__(self, grid_id, theta, pos):
+    def __init__(self, grid_pos, pos):
 
-        self.grid_id = grid_id
-        self.theta = theta
-
+        self.grid_pos = grid_pos
         self.pos = pos
         self.g = None
         self.f = None
         self.parent = None
-
         self.phi = None
-        self.steps = None
-        self.dt = None
 
 
 class SimpleState:
@@ -36,31 +31,31 @@ class SimpleState:
 
     def __init__(self, node):
 
-        self.grid_id = node.grid_id
-        self.theta = node.theta
+        self.grid_pos = node.grid_pos
     
     def __eq__(self, other):
 
-        return (self.grid_id == other.grid_id \
-            and self.theta == other.theta)
+        return (self.grid_pos == other.grid_pos)
     
     def __hash__(self):
 
-        return hash((self.grid_id, self.theta))
+        return hash((self.grid_pos))
     
 
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, theta_step=pi/12):
+    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40):
         
         self.car = car
         self.grid = grid
-        self.theta_step = theta_step
+        self.unit_theta = unit_theta
+        self.drive_steps = drive_steps
 
         self.start = self.car.start_pos
         self.goal = self.car.end_pos
 
+        self.r = self.car.l / tan(self.car.max_phi)
         self.dubins = DubinsPath(self.car)
 
         self.get_discretized_thetas()
@@ -69,36 +64,50 @@ class HybridAstar:
         """ Get all discretized headings in one grid. """
 
         self.thetas = [0]
+
         while True:
-            theta = self.thetas[-1] + self.theta_step
+            theta = self.thetas[-1] + self.unit_theta
             if theta > 2*pi:
                 break
             
             self.thetas.append(theta)
     
+    def round_theta(self, theta):
+
+        return min(self.thetas, key=lambda x: abs(x-theta))
+    
     def construct_node(self, pos, root=False):
         """ Create node for a pos. """
 
         theta = pos[2]
-        pos = pos[:2]
-        if root:
-            theta = mod_angle(self.start[2])
-            theta = min(self.thetas, key=lambda x: abs(x-theta))
-        
-        grid_id = self.grid.to_grid_id(pos)
+        pt = pos[:2]
 
-        node = Node(grid_id, theta, pos)
+        if root:
+            theta = self.round_theta(mod_angle(theta))
+        
+        cell_id = self.grid.to_cell_id(pt)
+        grid_pos = cell_id.tolist() + [theta]
+
+        node = Node(grid_pos, pos)
 
         return node
+        
+    def heuristic_cost(self, pos):
+        """ Heuristic for remaining cost estimation. """
+        
+        return distance(pos[:2], self.goal[:2])
+
+    def motion_primitive(self, node):
+        pass
     
     def backtracking(self, node):
 
-        controls = []
+        path = []
         while node.parent:
-            controls.append((node.phi, node.steps, node.dt))
+            path.append((node.pos, node.phi))
             node = node.parent
         
-        return list(reversed(controls))
+        return list(reversed(path))
     
     def search_path(self):
         """ Hybrid A* pathfinding. """
@@ -119,32 +128,24 @@ class HybridAstar:
             _closed.append(best)
 
             # check dubins path
-            pos = best.pos + [best.theta]
-            solutions = self.dubins.find_tangents(pos, self.goal)
-            dubins_controls = self.dubins.best_tangent(solutions)
+            solutions = self.dubins.find_tangents(best.pos, self.goal)
+            dubins_path = self.dubins.best_tangent(solutions, False)
             
-            if dubins_controls:
+            if dubins_path:
                 print('goal!')
-                controls = self.backtracking(best)
+                path = self.backtracking(best)
+                print(path)
+                print(dubins_path)
                 
-                return controls + dubins_controls
+                return path + dubins_path
 
             # construct neighbors
-
-    
-    def heuristic_cost(self, pos):
-        """ Heuristic for remaining cost estimation. """
-        
-        return distance(pos, self.goal[:2])
-
-    def get_path_length(self):
-        pass
 
 
 def main(grid_on=True):
 
     tc = TestCase()
-    env = Environment(tc.obs3)
+    env = Environment(tc.obs1)
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
     grid = Grid(env)
     ha = HybridAstar(car, grid)
@@ -155,27 +156,20 @@ def main(grid_on=True):
     end_state = car.get_car_state(car.end_pos)
 
     controls = [
-        (-radians(40), 150, 1e-2),
-        (0, 200, 1e-2),
-        (radians(15), 300, 1e-2)
+        (car.max_phi, 40, 1e-2),
+        (0, 40, 1e-2),
+        (-car.max_phi, 40, 1e-2)
     ]
-    path = car.get_path(car.start_pos, controls)
-
-    xl, yl = [], []
-    carl = []
-    for i in range(len(path)):
-        xl.append(path[i]['pos'][0])
-        yl.append(path[i]['pos'][1])
-        carl.append(path[i]['model'][0])
 
     # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
     ax.set_xlim(0, env.lx)
     ax.set_ylim(0, env.ly)
     ax.set_aspect("equal")
+
     if grid_on:
-        ax.set_xticks(np.arange(0, env.lx, grid.grid_size))
-        ax.set_yticks(np.arange(0, env.ly, grid.grid_size))
+        ax.set_xticks(np.arange(0, env.lx, grid.cell_size))
+        ax.set_yticks(np.arange(0, env.ly, grid.cell_size))
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.tick_params(length=0)
@@ -187,38 +181,20 @@ def main(grid_on=True):
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
-    ax.plot(start_state['pos'][0], start_state['pos'][1], 'ro', markersize=5)
-    ax = plot_a_car(ax, end_state['model'])
+    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
+    # ax = plot_a_car(ax, start_state['model'])
 
-    _path, = ax.plot([], [], color='lime', linewidth=1)
-    _carl = PatchCollection([])
-    ax.add_collection(_carl)
-    _car = PatchCollection([])
-    ax.add_collection(_car)
-    
-    frames = len(path) + 1
+    for c in controls:
+        path = car.get_path(car.start_pos, [c])
 
-    def animate(i):
-
-        _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
-
-        sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::20])
-        _carl.set_edgecolor('m')
-        _carl.set_facecolor('None')
-        _carl.set_alpha(0.2)
-
-        edgecolor = ['k']*5 + ['r']
-        facecolor = ['y'] + ['k']*4 + ['r']
-        _car.set_paths(path[min(i, len(path)-1)]['model'])
-        _car.set_edgecolor(edgecolor)
-        _car.set_facecolor(facecolor)
-        _car.set_zorder(3)
-
-        return _path, _carl, _car
-
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=5,
-                                  repeat=True, blit=True)
+        xl, yl = [], []
+        carl = []
+        for i in range(len(path)):
+            xl.append(path[i]['pos'][0])
+            yl.append(path[i]['pos'][1])
+            carl.append(path[i]['model'][0])
+        
+        ax.plot(xl, yl, 'b-', linewidth=1)
 
     plt.show()
 

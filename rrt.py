@@ -103,7 +103,7 @@ class RRT:
         while True:
             count += 1
             if count % self.pick_target_freq == 0:
-                pick = [self.goal.pos[0], self.goal.pos[1]]
+                pick = self.goal.pos[:2]
             else:
                 pick = self.car.random_pos()[:2]
             

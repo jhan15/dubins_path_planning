@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
-from utils.utils import transform, calculate_arc_len, same_point, plot_a_car
+from utils.utils import transform, directional_theta, same_point, plot_a_car
 
 
 class Params:
@@ -19,7 +19,7 @@ class Params:
         self.d = d
         self.t1 = None
         self.t2 = None
-        self.path_len = None
+        self.len = None
 
 
 class DubinsPath:
@@ -46,6 +46,53 @@ class DubinsPath:
             'RSR': [-1, -1]
         }
     
+    def find_tangents(self, start_pos, end_pos):
+        """ Find the tangents of four dubins paths. """
+
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+
+        x1, y1, theta1 = start_pos
+        x2, y2, theta2 = end_pos
+        
+        self.s = np.array(start_pos[:2])
+        self.e = np.array(end_pos[:2])
+        
+        self.lc1 = transform(x1, y1, 0, self.r, theta1, 1)
+        self.rc1 = transform(x1, y1, 0, self.r, theta1, 2)
+        self.lc2 = transform(x2, y2, 0, self.r, theta2, 1)
+        self.rc2 = transform(x2, y2, 0, self.r, theta2, 2)
+        
+        solutions = [self._LSL(), self._LSR(), self._RSL(), self._RSR()]
+        solutions = [s for s in solutions if s is not None]
+        solutions.sort(key=lambda x: x.len, reverse=False)
+        
+        return solutions
+    
+    def get_params(self, dub, c1, c2, t1, t2):
+        """ Calculate the dubins path length. """
+        
+        v1 = self.s - c1
+        v2 = t1     - c1
+        v3 = t2     - t1
+        v4 = t2     - c2
+        v5 = self.e - c2
+
+        delta_theta1 = directional_theta(v1, v2, dub.d[0])
+        delta_theta2 = directional_theta(v4, v5, dub.d[1])
+
+        arc1    = abs(delta_theta1*self.r)
+        tangent = np.linalg.norm(v3)
+        arc2    = abs(delta_theta2*self.r)
+
+        theta = self.start_pos[2] + delta_theta1
+
+        dub.t1 = t1.tolist() + [theta]
+        dub.t2 = t2.tolist() + [theta]
+        dub.len = arc1 + tangent + arc2
+        
+        return dub
+    
     def _LSL(self):
 
         lsl = Params(self.direction['LSL'])
@@ -54,10 +101,10 @@ class DubinsPath:
         R = np.linalg.norm(cline) / 2
         theta = atan2(cline[1], cline[0]) - acos(0)
 
-        lsl.t1 = transform(self.lc1[0], self.lc1[1], self.r, 0, theta, 1)
-        lsl.t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta, 1)
+        t1 = transform(self.lc1[0], self.lc1[1], self.r, 0, theta, 1)
+        t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta, 1)
 
-        lsl.path_len = self.path_length(lsl.d, self.lc1, self.lc2, lsl.t1, lsl.t2)
+        lsl = self.get_params(lsl, self.lc1, self.lc2, t1, t2)
 
         return lsl
 
@@ -73,10 +120,10 @@ class DubinsPath:
         
         theta = atan2(cline[1], cline[0]) - acos(self.r/R)
 
-        lsr.t1 = transform(self.lc1[0], self.lc1[1], self.r, 0, theta, 1)
-        lsr.t2 = transform(self.rc2[0], self.rc2[1], self.r, 0, theta+pi, 1)
+        t1 = transform(self.lc1[0], self.lc1[1], self.r, 0, theta, 1)
+        t2 = transform(self.rc2[0], self.rc2[1], self.r, 0, theta+pi, 1)
 
-        lsr.path_len = self.path_length(lsr.d, self.lc1, self.rc2, lsr.t1, lsr.t2)
+        lsr = self.get_params(lsr, self.lc1, self.rc2, t1, t2)
 
         return lsr
 
@@ -92,10 +139,10 @@ class DubinsPath:
         
         theta = atan2(cline[1], cline[0]) + acos(self.r/R)
 
-        rsl.t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
-        rsl.t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta+pi, 1)
+        t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
+        t2 = transform(self.lc2[0], self.lc2[1], self.r, 0, theta+pi, 1)
 
-        rsl.path_len = self.path_length(rsl.d, self.rc1, self.lc2, rsl.t1, rsl.t2)
+        rsl = self.get_params(rsl, self.rc1, self.lc2, t1, t2)
 
         return rsl
 
@@ -107,65 +154,30 @@ class DubinsPath:
         R = np.linalg.norm(cline) / 2
         theta = atan2(cline[1], cline[0]) + acos(0)
 
-        rsr.t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
-        rsr.t2 = transform(self.rc2[0], self.rc2[1], self.r, 0, theta, 1)
+        t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
+        t2 = transform(self.rc2[0], self.rc2[1], self.r, 0, theta, 1)
 
-        rsr.path_len = self.path_length(rsr.d, self.rc1, self.rc2, rsr.t1, rsr.t2)
+        rsr = self.get_params(rsr, self.rc1, self.rc2, t1, t2)
 
         return rsr
     
-    def find_tangents(self, start_pos, end_pos):
-        """ Find the tangents of four dubins paths. """
-
-        self.start_pos = start_pos
-        self.end_pos = end_pos
-
-        x1, y1, theta1 = start_pos
-        x2, y2, theta2 = end_pos
-        self.s = np.array(start_pos[:2])
-        self.e = np.array(end_pos[:2])
-        self.lc1 = transform(x1, y1, 0, self.r, theta1, 1)
-        self.rc1 = transform(x1, y1, 0, self.r, theta1, 2)
-        self.lc2 = transform(x2, y2, 0, self.r, theta2, 1)
-        self.rc2 = transform(x2, y2, 0, self.r, theta2, 2)
-        
-        solutions = [self._LSL(), self._LSR(), self._RSL(), self._RSR()]
-        solutions = [s for s in solutions if s is not None]
-        solutions.sort(key=lambda x: x.path_len, reverse=False)
-        
-        return solutions
-    
-    def best_tangent(self, solutions):
-        """ Get the controls of the shortest obstacle-free dubins path. """
+    def best_tangent(self, solutions, return_controls=True):
+        """ Get the shortest obstacle-free dubins path. """
 
         for s in solutions:
-            controls, safe = self.get_dubins_controls(s)
+            controls, path, safe = self.get_dubins_controls(s)
             if safe:
                 break
         
         if not safe:
             return None
         
-        return controls
-    
-    def path_length(self, d, c1, c2, t1, t2):
-        """ Calculate the dubins path length. """
+        if return_controls:
+            return controls
         
-        v1 = self.s - c1
-        v2 = t1     - c1
-        v3 = t2     - t1
-        v4 = t2     - c2
-        v5 = self.e - c2
-
-        arc1    = calculate_arc_len(v1, v2, d[0], self.r)
-        tangent = np.linalg.norm(v3)
-        arc2    = calculate_arc_len(v4, v5, d[1], self.r)
-
-        total = arc1 + tangent + arc2
-        
-        return total
+        return path
     
-    def get_dubins_controls(self, s, dt=1e-4):
+    def get_dubins_controls(self, s):
         """ Get the controls to visit a dubins path. """
 
         safe = True
@@ -176,26 +188,27 @@ class DubinsPath:
         phi3 = self.car.max_phi if s.d[1] == 1 else -self.car.max_phi
 
         phil = [phi1, phi2, phi3]
-        goal = [s.t1, s.t2, self.end_pos[:2]]
-        h = [1e-4, 1e-3, 1e-3]
+        goal = [s.t1, s.t2, self.end_pos]
+        
         pos = self.start_pos
 
         for i in range(len(phil)):
-            pos, count, at_goal = self.get_steps(pos, phil[i], goal[i], h[i], dt)
+            pos, count, dt, at_goal = self.get_steps(pos, phil[i], goal[i])
+            
             if at_goal:
                 controls.append((phil[i], count, dt))
             else:
                 safe = False
                 break
         
-        return controls, safe
+        return controls, list(zip(goal, phil)), safe
 
-    def get_steps(self, pos, phi, goal, h, dt, rate=1e-2):
+    def get_steps(self, pos, phi, goal, dt=1e-4, h=1e-4, freq=100):
         """ Count the steps to a goal for a steering angle. """
 
         at_goal = False
-        freq = int(rate / dt)
         count = 0
+
         while True:
             pos = self.car.step(pos, phi, dt)
             count += 1
@@ -206,11 +219,12 @@ class DubinsPath:
                 if not safe:
                     break
             
-            if same_point(pos[:2], goal, h=h):
+            if same_point(pos[:2], goal[:2], h=h):
                 at_goal = True
+                pos = goal
                 break
         
-        return pos, count, at_goal
+        return pos, count, dt, at_goal
 
 
 def main():
@@ -240,7 +254,7 @@ def main():
 
     tangents = []
     for s in solutions:
-        tangents.append([s.t1, s.t2])
+        tangents.append([s.t1[:2], s.t2[:2]])
     lc = LineCollection(tangents, color='k', linewidth=1)
     
     lcircle1 = plt.Circle(dubins.lc1, dubins.r, fc='None', ec='k')
