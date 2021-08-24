@@ -174,10 +174,9 @@ def main():
         _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
 
         sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::10])
-        _carl.set_edgecolor('m')
-        _carl.set_facecolor('None')
-        _carl.set_alpha(0.2)
+        _carl.set_paths(sub_carl[::20])
+        _carl.set_color('m')
+        _carl.set_alpha(0.1)
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
@@ -188,7 +187,7 @@ def main():
 
         return _path, _carl, _car
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
+    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=5,
                                   repeat=False, blit=True)
 
     plt.show()

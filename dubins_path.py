@@ -67,6 +67,10 @@ class DubinsPath:
 
         cline = self.rc2 - self.lc1
         R = np.linalg.norm(cline) / 2
+
+        if R < 2*self.r:
+            return None
+        
         theta = atan2(cline[1], cline[0]) - acos(self.r/R)
 
         lsr.t1 = transform(self.lc1[0], self.lc1[1], self.r, 0, theta, 1)
@@ -82,6 +86,10 @@ class DubinsPath:
 
         cline = self.lc2 - self.rc1
         R = np.linalg.norm(cline) / 2
+
+        if R < 2*self.r:
+            return None
+        
         theta = atan2(cline[1], cline[0]) + acos(self.r/R)
 
         rsl.t1 = transform(self.rc1[0], self.rc1[1], self.r, 0, theta, 1)
@@ -122,6 +130,7 @@ class DubinsPath:
         self.rc2 = transform(x2, y2, 0, self.r, theta2, 2)
         
         solutions = [self._LSL(), self._LSR(), self._RSL(), self._RSR()]
+        solutions = [s for s in solutions if s is not None]
         solutions.sort(key=lambda x: x.path_len, reverse=False)
         
         return solutions
@@ -267,10 +276,9 @@ def main():
     def animate(i):
 
         sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::10])
-        _carl.set_edgecolor('m')
-        _carl.set_facecolor('None')
-        _carl.set_alpha(0.2)
+        _carl.set_paths(sub_carl[::20])
+        _carl.set_color('m')
+        _carl.set_alpha(0.1)
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
@@ -281,7 +289,7 @@ def main():
 
         return _carl, _car
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
+    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=5,
                                   repeat=False, blit=True)
 
     plt.show()

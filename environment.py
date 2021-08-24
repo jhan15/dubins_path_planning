@@ -4,10 +4,10 @@ from obstacle import Obstacle
 class Environment:
     """ The map configuration. """
 
-    def __init__(self, obs=None):
+    def __init__(self, obs=None, lx=10, ly=10):
 
-        self.lx  = float(10)
-        self.ly  = float(10)
+        self.lx  = float(lx)
+        self.ly  = float(ly)
 
         if obs:
             self.obs = [Obstacle(*ob) for ob in obs]

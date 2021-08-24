@@ -49,7 +49,7 @@ class SimpleState:
 class RRT:
     """ RRT + Dubins path algorithms. """
 
-    def __init__(self, car, max_steps=50, pick_target_freq=10, check_dubins_freq=5):
+    def __init__(self, car, max_steps=50, pick_target_freq=10, check_dubins_freq=1):
 
         self.car = car
         self.max_steps = max_steps
@@ -83,18 +83,17 @@ class RRT:
         
         return phi
     
+    def backtracking(self, node):
+
+        controls = []
+        while node.parent:
+            controls.append((node.phi, node.steps, node.dt))
+            node = node.parent
+        
+        return list(reversed(controls))
+    
     def search_path(self):
         """ Search path, return controls. """
-
-        # check dubins path for start and target
-        solutions = self.dubins.find_tangents(self.start.pos, self.goal.pos)
-        dubins_controls = self.dubins.best_tangent(solutions)
-        
-        if dubins_controls:
-            return dubins_controls
-
-        # rrt
-        controls = []
 
         nodes = [self.start]
         states = [SimpleState(self.start)]
@@ -109,6 +108,15 @@ class RRT:
                 pick = self.car.random_pos()[:2]
             
             nearest = self.get_nearest_node(nodes, pick)
+
+            if count % self.check_dubins_freq == 0:
+                solutions = self.dubins.find_tangents(nearest.pos, self.goal.pos)
+                dubins_controls = self.dubins.best_tangent(solutions)
+                
+                if dubins_controls:
+                    final_node = nearest
+                    break
+
             phi = self.get_steering_angle(nearest.pos, pick)
             pos = nearest.pos
             
@@ -133,24 +141,10 @@ class RRT:
             states.append(new_state)
             new_node.parent = nearest
             nodes.append(new_node)
-
-            # check dubins path of new node
-            if count % self.check_dubins_freq == 0:
-                solutions = self.dubins.find_tangents(pos, self.goal.pos)
-                dubins_controls = self.dubins.best_tangent(solutions)
-                
-                if dubins_controls:
-                    final_node = new_node
-                    break
         
-        current = final_node
-        while current.parent:
-            controls.append((current.phi, current.steps, current.dt))
-            current = current.parent
+        controls = self.backtracking(final_node)
         
-        controls = list(reversed(controls)) + dubins_controls
-        
-        return controls
+        return controls + dubins_controls
 
 
 def main():
@@ -206,10 +200,9 @@ def main():
         _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
 
         sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::10])
-        _carl.set_edgecolor('m')
-        _carl.set_facecolor('None')
-        _carl.set_alpha(0.2)
+        _carl.set_paths(sub_carl[::20])
+        _carl.set_color('m')
+        _carl.set_alpha(0.1)
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
