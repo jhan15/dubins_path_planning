@@ -39,7 +39,7 @@ $ python3 car.py
 $ python3 dubins_path.py
 
 # pathfinding with RRT + Dubins Path (final shot)
-$ python3 main.py
+$ python3 rrt.py
 ```
 
 ## Functions

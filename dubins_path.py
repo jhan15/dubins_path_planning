@@ -181,11 +181,11 @@ class DubinsPath:
         
         return controls, safe
 
-    def get_steps(self, pos, phi, goal, h, dt):
+    def get_steps(self, pos, phi, goal, h, dt, rate=1e-2):
         """ Count the steps to a goal for a steering angle. """
 
         at_goal = False
-        freq = int(1e-2 / dt)
+        freq = int(rate / dt)
         count = 0
         while True:
             pos = self.car.step(pos, phi, dt)
