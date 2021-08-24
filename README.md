@@ -42,7 +42,7 @@ $ python3 dubins_path.py
 $ python3 rrt.py
 ```
 
-## Functions
+## Results
 
 #### Shortest obstacle-free Dubins Path
 
