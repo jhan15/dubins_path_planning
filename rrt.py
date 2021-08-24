@@ -121,7 +121,7 @@ class RRT:
                 pos = self.car.step(pos, phi)
                 car_state = self.car.get_car_state(pos, phi)
                 
-                safe = self.car.env.safe(car_state['vertex'])
+                safe = self.car.env.safe(car_state.vertex)
 
                 if not safe:
                     break
@@ -165,9 +165,9 @@ def main():
     xl, yl = [], []
     carl = []
     for i in range(len(path)):
-        xl.append(path[i]['pos'][0])
-        yl.append(path[i]['pos'][1])
-        carl.append(path[i]['model'][0])
+        xl.append(path[i].pos[0])
+        yl.append(path[i].pos[1])
+        carl.append(path[i].model[0])
 
     end_state = car.get_car_state(car.end_pos)
 
@@ -182,7 +182,7 @@ def main():
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
-    ax = plot_a_car(ax, end_state['model'])
+    ax = plot_a_car(ax, end_state.model)
 
     _path, = ax.plot([], [], color='lime', linewidth=1)
     _carl = PatchCollection([])
@@ -203,7 +203,7 @@ def main():
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
-        _car.set_paths(path[min(i, len(path)-1)]['model'])
+        _car.set_paths(path[min(i, len(path)-1)].model)
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
         _car.set_zorder(3)

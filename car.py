@@ -10,6 +10,15 @@ from test_cases.cases import TestCase
 from utils.utils import transform, same_point
 
 
+class State:
+
+    def __init__(self, pos, vertex, model):
+
+        self.pos = pos
+        self.vertex = vertex
+        self.model = model
+
+
 class SimpleCar:
     """ Car model and functions. """
 
@@ -46,7 +55,7 @@ class SimpleCar:
             pos = [x, y, theta]
             state = self.get_car_state(pos)
             
-            if self.env.obstacle_free(state['vertex']):
+            if self.env.obstacle_free(state.vertex):
                 break
 
         return pos
@@ -70,18 +79,18 @@ class SimpleCar:
         self.w3 = transform(x, y, 0.2*self.l, 0.1*self.l, theta, 3)
         self.w4 = transform(x, y, 0.2*self.l, 0.3*self.l, theta, 4)
 
-        state = {
-            'pos'   :   [x, y, theta],
-            'vertex':   [self.c1, self.c2, self.c3, self.c4],
-            'model' :   [
-                Rectangle(self.c4, self.carl, self.carw, degrees(theta), fc='y', ec='k'),
-                Rectangle(self.w1, self.whll, self.whlw, degrees(theta+phi), fc='k', ec='k'),
-                Rectangle(self.w2, self.whll, self.whlw, degrees(theta+phi), fc='k', ec='k'),
-                Rectangle(self.w3, self.whll, self.whlw, degrees(theta), fc='k', ec='k'),
-                Rectangle(self.w4, self.whll, self.whlw, degrees(theta), fc='k', ec='k'),
-                Arrow(x, y, 1.1*self.carl*cos(theta), 1.1*self.carl*sin(theta), width=0.1, color='r')
-            ]
-        }
+        pos = [x, y, theta]
+        vertex = [self.c1, self.c2, self.c3, self.c4]
+        model = [
+            Rectangle(self.c4, self.carl, self.carw, degrees(theta), fc='y', ec='k'),
+            Rectangle(self.w1, self.whll, self.whlw, degrees(theta+phi), fc='k', ec='k'),
+            Rectangle(self.w2, self.whll, self.whlw, degrees(theta+phi), fc='k', ec='k'),
+            Rectangle(self.w3, self.whll, self.whlw, degrees(theta), fc='k', ec='k'),
+            Rectangle(self.w4, self.whll, self.whlw, degrees(theta), fc='k', ec='k'),
+            Arrow(x, y, 1.1*self.carl*cos(theta), 1.1*self.carl*sin(theta), width=0.1, color='r')
+        ]
+
+        state = State(pos, vertex, model)
 
         return state
     
@@ -114,7 +123,7 @@ class SimpleCar:
                     path.append(car_state)
 
                     if safety_check:
-                        safe = self.env.safe(car_state['vertex'])
+                        safe = self.env.safe(car_state.vertex)
                         if not safe:
                             break
 
@@ -178,9 +187,9 @@ def main():
     xl, yl = [], []
     carl = []
     for i in range(len(path)):
-        xl.append(path[i]['pos'][0])
-        yl.append(path[i]['pos'][1])
-        carl.append(path[i]['model'][0])
+        xl.append(path[i].pos[0])
+        yl.append(path[i].pos[1])
+        carl.append(path[i].model[0])
 
     # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
@@ -212,7 +221,7 @@ def main():
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
-        _car.set_paths(path[min(i, len(path)-1)]['model'])
+        _car.set_paths(path[min(i, len(path)-1)].model)
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
         _car.set_zorder(3)

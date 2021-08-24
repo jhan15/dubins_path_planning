@@ -209,7 +209,7 @@ def main():
 
     carl = []
     for i in range(len(path)):
-        carl.append(path[i]['model'][0])
+        carl.append(path[i].model[0])
 
     end_state = car.get_car_state(car.end_pos)
 
@@ -240,7 +240,7 @@ def main():
     ax.add_patch(lcircle2)
     ax.add_patch(rcircle2)
     
-    ax = plot_a_car(ax, end_state['model'])
+    ax = plot_a_car(ax, end_state.model)
 
     _carl = PatchCollection([])
     ax.add_collection(_carl)
@@ -257,7 +257,7 @@ def main():
 
         edgecolor = ['k']*5 + ['r']
         facecolor = ['y'] + ['k']*4 + ['r']
-        _car.set_paths(path[min(i, len(path)-1)]['model'])
+        _car.set_paths(path[min(i, len(path)-1)].model)
         _car.set_edgecolor(edgecolor)
         _car.set_facecolor(facecolor)
         _car.set_zorder(3)
