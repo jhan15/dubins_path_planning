@@ -102,12 +102,12 @@ class HybridAstar:
     
     def backtracking(self, node):
 
-        path = []
+        route = []
         while node.parent:
-            path.append((node.pos, node.phi))
+            route.append((node.pos, node.phi))
             node = node.parent
         
-        return list(reversed(path))
+        return list(reversed(route))
     
     def search_path(self):
         """ Hybrid A* pathfinding. """
@@ -129,13 +129,14 @@ class HybridAstar:
 
             # check dubins path
             solutions = self.dubins.find_tangents(best.pos, self.goal)
-            _, dubins_path, valid = self.dubins.best_tangent(solutions)
+            dubins_path, valid = self.dubins.best_tangent(solutions)
             
             if valid:
                 print('goal!')
-                path = self.backtracking(best)
+                route = self.backtracking(best)
+                # path, _ = self.car.get_path(self.start, route)
                 
-                return path + dubins_path
+                return dubins_path
 
             # construct neighbors
 
@@ -148,15 +149,15 @@ def main(grid_on=True):
     grid = Grid(env)
     ha = HybridAstar(car, grid)
 
-    ha.search_path()
+    path = ha.search_path()
 
     start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
 
     controls = [
-        (car.max_phi, 40, 1e-2),
-        (0, 40, 1e-2),
-        (-car.max_phi, 40, 1e-2)
+        (car.max_phi, 40),
+        (0, 40),
+        (-car.max_phi, 40)
     ]
 
     # plot and annimation
@@ -183,7 +184,7 @@ def main(grid_on=True):
     ax = plot_a_car(ax, start_state['model'])
 
     for c in controls:
-        path = car.get_path(car.start_pos, [c])
+        path = car._get_path(car.start_pos, [c])
 
         xl, yl = [], []
         carl = []
