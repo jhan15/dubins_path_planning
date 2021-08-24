@@ -161,26 +161,20 @@ class DubinsPath:
 
         return rsr
     
-    def best_tangent(self, solutions, return_controls=True):
+    def best_tangent(self, solutions):
         """ Get the shortest obstacle-free dubins path. """
 
         for s in solutions:
-            controls, path, safe = self.get_dubins_controls(s)
-            if safe:
+            controls, path, valid = self.get_dubins_controls(s)
+            if valid:
                 break
         
-        if not safe:
-            return None
-        
-        if return_controls:
-            return controls
-        
-        return path
+        return controls, path, valid
     
     def get_dubins_controls(self, s):
         """ Get the controls to visit a dubins path. """
 
-        safe = True
+        valid = True
         controls = []
 
         phi1 = self.car.max_phi if s.d[0] == 1 else -self.car.max_phi
@@ -198,10 +192,10 @@ class DubinsPath:
             if at_goal:
                 controls.append((phil[i], count, dt))
             else:
-                safe = False
+                valid = False
                 break
         
-        return controls, list(zip(goal, phil)), safe
+        return controls, list(zip(goal, phil)), valid
 
     def get_steps(self, pos, phi, goal, dt=1e-4, h=1e-4, freq=100):
         """ Count the steps to a goal for a steering angle. """
@@ -243,7 +237,12 @@ def main():
 
     # shortest obstacle-free dubins path
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
-    controls = dubins.best_tangent(solutions)
+    controls, _, valid = dubins.best_tangent(solutions)
+    
+    if not valid:
+        print('No valid dubins path!')
+        return
+    
     path = car.get_path(car.start_pos, controls)
 
     carl = []

@@ -111,9 +111,9 @@ class RRT:
 
             if count % self.check_dubins_freq == 0:
                 solutions = self.dubins.find_tangents(nearest.pos, self.goal.pos)
-                dubins_controls = self.dubins.best_tangent(solutions)
+                dubins_controls, _, valid = self.dubins.best_tangent(solutions)
                 
-                if dubins_controls:
+                if valid:
                     final_node = nearest
                     break
 
