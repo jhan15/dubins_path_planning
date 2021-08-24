@@ -70,10 +70,10 @@ class SimpleCar:
         self.c3 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 3)
         self.c4 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 4)
 
-        c_ = transform(x, y, self.l, 0.2*self.l, theta, 1)
+        c_      = transform(x, y, self.l, 0.2*self.l, theta, 1)
         self.w1 = transform(c_[0], c_[1], 0.2*self.l, 0.1*self.l, theta+phi, 4)
         
-        c_ = transform(x, y, self.l, 0.2*self.l, theta, 2)
+        c_      = transform(x, y, self.l, 0.2*self.l, theta, 2)
         self.w2 = transform(c_[0], c_[1], 0.2*self.l, 0.1*self.l, theta+phi, 4)
         
         self.w3 = transform(x, y, 0.2*self.l, 0.1*self.l, theta, 3)
