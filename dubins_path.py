@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
-from utils.utils import transform, directional_theta, same_point, plot_a_car
+from utils.utils import transform, directional_theta, plot_a_car
 
 
 class Params:
@@ -165,60 +165,24 @@ class DubinsPath:
         """ Get the shortest obstacle-free dubins path. """
 
         for s in solutions:
-            controls, path, valid = self.get_dubins_controls(s)
-            if valid:
+            route = self.get_route(s)
+            path, safe = self.car.get_path(self.start_pos, route, 1e-4, True)
+
+            if safe:
                 break
         
-        return controls, path, valid
+        return path, safe
     
-    def get_dubins_controls(self, s):
-        """ Get the controls to visit a dubins path. """
-
-        valid = True
-        controls = []
+    def get_route(self, s):
+        """ Get the route of dubins path. """
 
         phi1 = self.car.max_phi if s.d[0] == 1 else -self.car.max_phi
-        phi2 = 0
-        phi3 = self.car.max_phi if s.d[1] == 1 else -self.car.max_phi
+        phi2 = self.car.max_phi if s.d[1] == 1 else -self.car.max_phi
 
-        phil = [phi1, phi2, phi3]
+        phil = [phi1, 0, phi2]
         goal = [s.t1, s.t2, self.end_pos]
         
-        pos = self.start_pos
-
-        for i in range(len(phil)):
-            pos, count, dt, at_goal = self.get_steps(pos, phil[i], goal[i])
-            
-            if at_goal:
-                controls.append((phil[i], count, dt))
-            else:
-                valid = False
-                break
-        
-        return controls, list(zip(goal, phil)), valid
-
-    def get_steps(self, pos, phi, goal, dt=1e-4, h=1e-4, freq=100):
-        """ Count the steps to a goal for a steering angle. """
-
-        at_goal = False
-        count = 0
-
-        while True:
-            pos = self.car.step(pos, phi, dt)
-            count += 1
-            
-            if count % freq == 0:
-                car_state = self.car.get_car_state(pos, phi)
-                safe = self.car.env.safe(car_state['vertex'])
-                if not safe:
-                    break
-            
-            if same_point(pos[:2], goal[:2], h=h):
-                at_goal = True
-                pos = goal
-                break
-        
-        return pos, count, dt, at_goal
+        return list(zip(goal, phil))
 
 
 def main():
@@ -237,13 +201,11 @@ def main():
 
     # shortest obstacle-free dubins path
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
-    controls, _, valid = dubins.best_tangent(solutions)
+    path, safe = dubins.best_tangent(solutions)
     
-    if not valid:
+    if not safe:
         print('No valid dubins path!')
         return
-    
-    path = car.get_path(car.start_pos, controls)
 
     carl = []
     for i in range(len(path)):

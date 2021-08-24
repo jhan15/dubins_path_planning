@@ -129,13 +129,11 @@ class HybridAstar:
 
             # check dubins path
             solutions = self.dubins.find_tangents(best.pos, self.goal)
-            dubins_path = self.dubins.best_tangent(solutions, False)
+            _, dubins_path, valid = self.dubins.best_tangent(solutions)
             
-            if dubins_path:
+            if valid:
                 print('goal!')
                 path = self.backtracking(best)
-                print(path)
-                print(dubins_path)
                 
                 return path + dubins_path
 
@@ -145,7 +143,7 @@ class HybridAstar:
 def main(grid_on=True):
 
     tc = TestCase()
-    env = Environment(tc.obs1)
+    env = Environment(tc.obs3)
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
     grid = Grid(env)
     ha = HybridAstar(car, grid)
@@ -182,7 +180,7 @@ def main(grid_on=True):
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
     ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
-    # ax = plot_a_car(ax, start_state['model'])
+    ax = plot_a_car(ax, start_state['model'])
 
     for c in controls:
         path = car.get_path(car.start_pos, [c])

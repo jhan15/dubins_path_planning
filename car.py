@@ -7,7 +7,7 @@ import matplotlib.animation as animation
 
 from environment import Environment
 from test_cases.cases import TestCase
-from utils.utils import transform
+from utils.utils import transform, same_point
 
 
 class SimpleCar:
@@ -99,22 +99,51 @@ class SimpleCar:
 
         return [x, y, theta]
     
-    def get_path(self, pos, controls, base=1e-2):
+    def get_path(self, pos, route, dt=1e-2, safety_check=False):
+        """ Generate path according to route. """
+
+        path = []
+        count = 0
+        f = int(1e-2 / dt)
+        safe = True
+
+        for goal, phi in route:
+            while True:
+                if count % f == 0:
+                    car_state = self.get_car_state(pos, phi)
+                    path.append(car_state)
+
+                    if safety_check:
+                        safe = self.env.safe(car_state['vertex'])
+                        if not safe:
+                            break
+
+                pos = self.step(pos, phi, dt)
+                count += 1
+
+                if same_point(pos[:2], goal[:2]):
+                    pos = goal
+                    break
+            
+            if safety_check:
+                if not safe:
+                    break
+        
+        car_state = self.get_car_state(pos, phi)
+        path.append(car_state)
+
+        return path, safe
+    
+    def _get_path(self, pos, controls):
         """ Generate driving path according to control inputs. """
         
         path = []
-        count = 0
 
-        for phi, steps, dt in controls:
-            freq = int(base / dt)
-            
+        for phi, steps in controls:
             for _ in range(steps):
-                if count % freq == 0:
-                    car_state = self.get_car_state(pos, phi)
-                    path.append(car_state)
-                
-                pos = self.step(pos, phi, dt)
-                count += 1
+                car_state = self.get_car_state(pos, phi)
+                path.append(car_state)
+                pos = self.step(pos, phi)
         
         car_state = self.get_car_state(pos, phi)
         path.append(car_state)
@@ -135,15 +164,16 @@ def main():
 
     # example controls to demonstrate car dynamics
     controls = [
-        (-pi/8, 150, 1e-2),
-        (0, 200, 1e-2),
-        (-pi/8, 300, 1e-2),
-        (0, 300, 1e-2),
-        (pi/4, 100, 1e-2),
-        (-pi/4, 100, 1e-2),
-        (pi/4, 100, 1e-2)
+        (-pi/8, 150),
+        (0, 200),
+        (-pi/8, 300),
+        (0, 300),
+        (pi/4, 100),
+        (-pi/4, 100),
+        (pi/4, 100)
     ]
-    path = car.get_path(car.start_pos, controls)
+
+    path = car._get_path(car.start_pos, controls)
 
     xl, yl = [], []
     carl = []

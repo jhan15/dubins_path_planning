@@ -15,12 +15,11 @@ from utils.utils import distance, plot_a_car
 class Node:
     """ RRT tree node. """
 
-    def __init__(self, pos, phi=0, steps=0, dt=1e-2):
+    def __init__(self, pos, phi=0, steps=0):
 
         self.pos = pos
         self.phi = phi
         self.steps = steps
-        self.dt = dt
         self.parent = None
 
 
@@ -32,29 +31,27 @@ class SimpleState:
         self.pos = node.pos
         self.phi = node.phi
         self.steps = node.steps
-        self.dt = node.dt
     
     def __eq__(self, other):
 
         return (self.pos == other.pos \
             and self.phi == other.phi \
-            and self.steps == other.steps \
-            and self.dt == other.dt)
+            and self.steps == other.steps)
     
     def __hash__(self):
 
-        return hash((self.pos, self.phi, self.steps, self.dt))
+        return hash((self.pos, self.phi, self.steps))
 
 
 class RRT:
     """ RRT + Dubins path algorithms. """
 
-    def __init__(self, car, max_steps=50, pick_target_freq=10, check_dubins_freq=1):
+    def __init__(self, car, max_steps=50, pick_target=10, check_dubins=1):
 
         self.car = car
         self.max_steps = max_steps
-        self.pick_target_freq = pick_target_freq
-        self.check_dubins_freq = check_dubins_freq
+        self.pick_target = pick_target
+        self.check_dubins = check_dubins
 
         self.start = Node(self.car.start_pos)
         self.goal = Node(self.car.end_pos)
@@ -85,12 +82,12 @@ class RRT:
     
     def backtracking(self, node):
 
-        controls = []
+        route = []
         while node.parent:
-            controls.append((node.phi, node.steps, node.dt))
+            route.append((node.pos, node.phi))
             node = node.parent
         
-        return list(reversed(controls))
+        return list(reversed(route))
     
     def search_path(self):
         """ Search path, return controls. """
@@ -102,16 +99,16 @@ class RRT:
         count = 0
         while True:
             count += 1
-            if count % self.pick_target_freq == 0:
+            if count % self.pick_target == 0:
                 pick = self.goal.pos[:2]
             else:
                 pick = self.car.random_pos()[:2]
             
             nearest = self.get_nearest_node(nodes, pick)
 
-            if count % self.check_dubins_freq == 0:
+            if count % self.check_dubins == 0:
                 solutions = self.dubins.find_tangents(nearest.pos, self.goal.pos)
-                dubins_controls, _, valid = self.dubins.best_tangent(solutions)
+                dubins_path, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
                     final_node = nearest
@@ -142,9 +139,10 @@ class RRT:
             new_node.parent = nearest
             nodes.append(new_node)
         
-        controls = self.backtracking(final_node)
+        route = self.backtracking(final_node)
+        path, _ = self.car.get_path(self.car.start_pos, route)
         
-        return controls + dubins_controls
+        return path[:-1] + dubins_path
 
 
 def main():
@@ -162,8 +160,7 @@ def main():
     rrt = RRT(car)
 
     # pathfinding
-    controls = rrt.search_path()
-    path = car.get_path(car.start_pos, controls)
+    path = rrt.search_path()
 
     xl, yl = [], []
     carl = []
