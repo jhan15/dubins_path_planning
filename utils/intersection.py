@@ -1,6 +1,3 @@
-from time import time
-import numpy as np
-
 def polygons_intersected(a, b):
 
     polygons = [a, b]
