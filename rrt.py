@@ -9,7 +9,10 @@ from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
 from dubins_path import DubinsPath
+from lookup import Lookup
 from utils.utils import distance, plot_a_car
+
+from time import time
 
 
 class Node:
@@ -57,6 +60,7 @@ class RRT:
         self.goal = Node(self.car.end_pos)
 
         self.dubins = DubinsPath(self.car)
+        self.lookup = Lookup(self.car)
     
     def get_nearest_node(self, nodes, pick):
         """ Get the nearest node of a random pick. """
@@ -102,13 +106,13 @@ class RRT:
             if count % self.pick_target == 0:
                 pick = self.goal.pos[:2]
             else:
-                pick = self.car.random_pos()[:2]
+                pick = self.car.random_pos(self.lookup)[:2]
             
             nearest = self.get_nearest_node(nodes, pick)
 
             if count % self.check_dubins == 0:
                 solutions = self.dubins.find_tangents(nearest.pos, self.goal.pos)
-                dubins_path, valid = self.dubins.best_tangent(solutions)
+                dubins_route, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
                     final_node = nearest
@@ -119,9 +123,7 @@ class RRT:
             
             for i in range(self.max_steps):
                 pos = self.car.step(pos, phi)
-                car_state = self.car.get_car_state(pos, phi)
-                
-                safe = self.car.env.safe(car_state.vertex)
+                safe = self.car.is_pos_safe(pos, self.lookup)
 
                 if not safe:
                     break
@@ -139,10 +141,10 @@ class RRT:
             new_node.parent = nearest
             nodes.append(new_node)
         
-        route = self.backtracking(final_node)
-        path, _ = self.car.get_path(self.car.start_pos, route)
+        route = self.backtracking(final_node) + dubins_route
+        path = self.car.get_path(self.car.start_pos, route)
         
-        return path[:-1] + dubins_path
+        return path
 
 
 def main():
@@ -160,7 +162,11 @@ def main():
     rrt = RRT(car)
 
     # pathfinding
+    t = time()
+
     path = rrt.search_path()
+
+    print('Total time: {}s'.format(round(time()-t, 3)))
 
     xl, yl = [], []
     carl = []
@@ -182,6 +188,7 @@ def main():
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
+    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
     ax = plot_a_car(ax, end_state.model)
 
     _path, = ax.plot([], [], color='lime', linewidth=1)

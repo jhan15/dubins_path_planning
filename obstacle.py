@@ -1,4 +1,4 @@
-from shapely.geometry import Polygon
+from utils.intersection import polygons_intersected
 
 
 class Obstacle:
@@ -11,13 +11,12 @@ class Obstacle:
         self.w = float(w)
         self.h = float(h)
     
-    def safe(self, car_vertex, safe_dis=0.1):
+    def safe(self, vertex, safe_dis=0.1):
         """ Check a car state is intersected with an obstacle or not. """
 
-        car = Polygon(car_vertex)
-        obs = Polygon([(self.x-safe_dis, self.y-safe_dis),
-                       (self.x+self.w+safe_dis, self.y-safe_dis),
-                       (self.x+self.w+safe_dis, self.y+self.h+safe_dis),
-                       (self.x-safe_dis, self.y+self.h+safe_dis)])
+        obs = [(self.x-safe_dis,        self.y-safe_dis),
+               (self.x+self.w+safe_dis, self.y-safe_dis),
+               (self.x+self.w+safe_dis, self.y+self.h+safe_dis),
+               (self.x-safe_dis,        self.y+self.h+safe_dis)]
         
-        return not car.intersects(obs)
+        return not polygons_intersected(vertex, obs)

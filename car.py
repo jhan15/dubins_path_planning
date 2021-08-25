@@ -6,8 +6,11 @@ from matplotlib.collections import PatchCollection
 import matplotlib.animation as animation
 
 from environment import Environment
+from lookup import Lookup
 from test_cases.cases import TestCase
 from utils.utils import transform, same_point
+
+from time import time
 
 
 class State:
@@ -44,7 +47,7 @@ class SimpleCar:
         else:
             self.end_pos = self.random_pos()
     
-    def random_pos(self):
+    def random_pos(self, lookup):
         """ Generate a random pos. """
         
         while True:
@@ -53,9 +56,9 @@ class SimpleCar:
             theta = uniform(-pi, pi)
             
             pos = [x, y, theta]
-            state = self.get_car_state(pos)
+            safe = self.is_pos_safe(pos, lookup)
             
-            if self.env.obstacle_free(state.vertex):
+            if safe:
                 break
 
         return pos
@@ -80,7 +83,9 @@ class SimpleCar:
         self.w4 = transform(x, y, 0.2*self.l, 0.3*self.l, theta, 4)
 
         pos = [x, y, theta]
-        vertex = [self.c1, self.c2, self.c3, self.c4]
+        
+        vertex = [self.c1.tolist(), self.c2.tolist(), self.c4.tolist(), self.c3.tolist()]
+        
         model = [
             Rectangle(self.c4, self.carl, self.carw, degrees(theta), fc='y', ec='k'),
             Rectangle(self.w1, self.whll, self.whlw, degrees(theta+phi), fc='k', ec='k'),
@@ -108,40 +113,56 @@ class SimpleCar:
 
         return [x, y, theta]
     
-    def get_path(self, pos, route, dt=1e-2, safety_check=False):
-        """ Generate path according to route. """
+    def is_pos_safe(self, pos, lookup):
+        """ Check pos safety by lookup table. """
 
-        path = []
-        count = 0
-        f = int(1e-2 / dt)
+        lookup_vertex = lookup.transform_state(pos)
+
+        return self.env.safe(lookup_vertex)
+    
+    def is_route_safe(self, pos, route, lookup):
+        """ Check route safety by lookup table. """
+
         safe = True
 
         for goal, phi in route:
             while True:
-                if count % f == 0:
-                    car_state = self.get_car_state(pos, phi)
-                    path.append(car_state)
+                pos = self.step(pos, phi)
+                safe = self.is_pos_safe(pos, lookup)
 
-                    if safety_check:
-                        safe = self.env.safe(car_state.vertex)
-                        if not safe:
-                            break
-
-                pos = self.step(pos, phi, dt)
-                count += 1
+                if not safe:
+                    break
 
                 if same_point(pos[:2], goal[:2]):
                     pos = goal
                     break
             
-            if safety_check:
-                if not safe:
+            if not safe:
+                break
+
+        return safe
+
+    
+    def get_path(self, pos, route):
+        """ Generate path according to route. """
+
+        path = []
+
+        for goal, phi in route:
+            while True:
+                car_state = self.get_car_state(pos, phi)
+                path.append(car_state)
+
+                pos = self.step(pos, phi)
+
+                if same_point(pos[:2], goal[:2]):
+                    pos = goal
                     break
         
         car_state = self.get_car_state(pos, phi)
         path.append(car_state)
 
-        return path, safe
+        return path
     
     def _get_path(self, pos, controls):
         """ Generate driving path according to control inputs. """
@@ -201,6 +222,8 @@ def main():
 
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
+    
+    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
 
     _path, = ax.plot([], [], color='lime', linewidth=1)
     _carl = PatchCollection([])

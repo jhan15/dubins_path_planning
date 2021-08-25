@@ -37,7 +37,7 @@ def arc_length(pos1, pos2, r):
 
     if delta_theta != 0:
         arc = abs(delta_theta*r)
-        chord = 2*r*sin(delta_theta/2)
+        chord = abs(2*r*sin(delta_theta/2))
     else:
         arc = distance(pos1[:2], pos2[:2])
         chord = arc
@@ -66,7 +66,7 @@ def distance(pt1, pt2):
     return d
 
 
-def same_point(pt1, pt2, h=1e-4):
+def same_point(pt1, pt2, h=1e-2):
     """ Check two points are same within a samll error. """
 
     d = distance(pt1, pt2)
@@ -77,3 +77,22 @@ def same_point(pt1, pt2, h=1e-4):
 def mod_angle(angle):
 
     return angle % (2*pi)
+
+
+def round_theta(theta, thetas):
+
+    return min(thetas, key=lambda x: abs(x-theta))
+
+
+def get_discretized_thetas(unit_theta):
+
+    thetas = [0]
+
+    while True:
+        theta = thetas[-1] + unit_theta
+        if theta > 2*pi:
+            break
+        
+        thetas.append(theta)
+    
+    return thetas

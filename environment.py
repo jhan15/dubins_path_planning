@@ -14,10 +14,10 @@ class Environment:
         else:
             self.obs = []
     
-    def inbounds(self, car_vertex, safe_dis=0.1):
-        """ Check car within the map bounds. """
+    def inbounds(self, vertex, safe_dis=0.1):
+        """ Check target within the map bounds. """
 
-        for v in car_vertex:
+        for v in vertex:
             if v[0] < safe_dis:
                 return False
             if v[0] > self.lx - safe_dis:
@@ -29,19 +29,19 @@ class Environment:
         
         return True
 
-    def obstacle_free(self, car_vertex):
-        """ Check car is obstacle-free or not. """
+    def obstacle_free(self, vertex):
+        """ Check target is obstacle-free or not. """
 
         for ob in self.obs:
-            if not ob.safe(car_vertex):
+            if not ob.safe(vertex):
                 return False
         
         return True
 
-    def safe(self, car_vertex):
-        """ Check car is safe or not. """
+    def safe(self, vertex):
+        """ Check target is safe or not. """
 
-        if self.inbounds(car_vertex) and self.obstacle_free(car_vertex):
+        if self.inbounds(vertex) and self.obstacle_free(vertex):
             return True
         
         return False

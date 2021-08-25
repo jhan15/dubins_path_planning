@@ -8,7 +8,10 @@ import matplotlib.animation as animation
 from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
+from lookup import Lookup
 from utils.utils import transform, directional_theta, plot_a_car
+
+from time import time
 
 
 class Params:
@@ -37,6 +40,8 @@ class DubinsPath:
 
         self.car = car
         self.r = self.car.l / tan(self.car.max_phi)
+
+        self.lookup = Lookup(self.car)
         
         # turn left: 1, turn right: -1
         self.direction = {
@@ -166,12 +171,33 @@ class DubinsPath:
 
         for s in solutions:
             route = self.get_route(s)
-            path, safe = self.car.get_path(self.start_pos, route, 1e-4, True)
+
+            safe = self.is_tangent_route_safe(route[0][0], route[1][0])
+            if not safe:
+                continue
+
+            safe = self.car.is_route_safe(self.start_pos, [route[0]], self.lookup)
+            if not safe:
+                continue
+
+            safe = self.car.is_route_safe(route[1][0], [route[2]], self.lookup)
+            if not safe:
+                continue
 
             if safe:
                 break
         
-        return path, safe
+        return route, safe
+    
+    def is_tangent_route_safe(self, t1, t2):
+        """ Consider the tangent route as a long rectangle and quickly check safety. """
+
+        state1 = self.car.get_car_state(t1)
+        state2 = self.car.get_car_state(t2)
+
+        vertex = [state2.vertex[0], state2.vertex[1], state1.vertex[3], state1.vertex[2]]
+
+        return self.car.env.safe(vertex)
     
     def get_route(self, s):
         """ Get the route of dubins path. """
@@ -201,11 +227,13 @@ def main():
 
     # shortest obstacle-free dubins path
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
-    path, safe = dubins.best_tangent(solutions)
-    
+    route, safe = dubins.best_tangent(solutions)
+
     if not safe:
         print('No valid dubins path!')
         return
+
+    path = car.get_path(car.start_pos, route)
 
     carl = []
     for i in range(len(path)):
@@ -233,6 +261,8 @@ def main():
 
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
+    
+    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
     
     ax.add_collection(lc)
     ax.add_patch(lcircle1)
