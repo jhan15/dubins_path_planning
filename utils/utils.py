@@ -75,12 +75,6 @@ def same_point(pt1, pt2, h=1e-2):
     return d < h
 
 
-def mod_angle(angle):
-    """ Mode angle to [0, 2*pi). """
-
-    return angle % (2*pi)
-
-
 def round_theta(theta, thetas):
     """ Round theta to closest discretized value. """
 
