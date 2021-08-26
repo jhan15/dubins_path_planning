@@ -1,5 +1,4 @@
 from math import pi
-import numpy as np
 
 from utils.utils import get_discretized_thetas, round_theta, mod_angle
 
