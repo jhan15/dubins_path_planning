@@ -34,3 +34,15 @@ def polygons_intersected(a, b):
                 return False
 
     return True
+
+
+def main():
+
+    a = [[1,1], [2,2], [1,3], [0,2]]
+    b = [[3,1], [4,1], [4,2], [3,2]]
+
+    print(polygons_intersected(a, b))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,6 +1,5 @@
 import numpy as np
 from math import sqrt
-from itertools import product
 
 
 class Grid:
@@ -15,11 +14,6 @@ class Grid:
         self.n = int(self.env.lx / self.cell_size)
 
         self.cell_dia = sqrt(2*self.cell_size**2)
-    
-    # def get_grids(self):
-    #     """ Get all the grids on the map. """
-
-    #     return [(i, j) for i, j in product(range(self.m), range(self.n))]
     
     def to_cell_id(self, pt):
         """" Convert point into grid index. """

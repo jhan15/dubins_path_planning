@@ -23,6 +23,7 @@ def transform(x, y, w, l, theta, id):
 
 
 def plot_a_car(ax, model):
+    """ Plot a car model. """
 
     pc = PatchCollection(model, match_original=True, zorder=2)
     ax.add_collection(pc)
@@ -75,16 +76,19 @@ def same_point(pt1, pt2, h=1e-2):
 
 
 def mod_angle(angle):
+    """ Mode angle to [0, 2*pi). """
 
     return angle % (2*pi)
 
 
 def round_theta(theta, thetas):
+    """ Round theta to closest discretized value. """
 
     return min(thetas, key=lambda x: abs(x-theta))
 
 
 def get_discretized_thetas(unit_theta):
+    """ Get all discretized theta values by unit value. """
 
     thetas = [0]
 

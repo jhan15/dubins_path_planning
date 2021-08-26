@@ -27,8 +27,8 @@ class Lookup:
 
         for theta in self.thetas:
             pos = [0, 0, theta]
-            car_state = self.car.get_car_state(pos)
-            param = Params(theta, car_state.vertex)
+            vertex = self.car.get_car_bounding(pos)
+            param = Params(theta, vertex)
             
             self.lookup.append(param)
     

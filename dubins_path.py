@@ -45,9 +45,9 @@ class DubinsPath:
         
         # turn left: 1, turn right: -1
         self.direction = {
-            'RSL': [-1, 1],
             'LSL': [1, 1],
             'LSR': [1, -1],
+            'RSL': [-1, 1],
             'RSR': [-1, -1]
         }
     
@@ -192,10 +192,10 @@ class DubinsPath:
     def is_tangent_route_safe(self, t1, t2):
         """ Consider the tangent route as a long rectangle and quickly check safety. """
 
-        state1 = self.car.get_car_state(t1)
-        state2 = self.car.get_car_state(t2)
+        vertex1 = self.car.get_car_bounding(t1)
+        vertex2 = self.car.get_car_bounding(t2)
 
-        vertex = [state2.vertex[0], state2.vertex[1], state1.vertex[3], state1.vertex[2]]
+        vertex = [vertex2[0], vertex2[1], vertex1[3], vertex1[2]]
 
         return self.car.env.safe(vertex)
     
@@ -226,8 +226,11 @@ def main():
     dubins = DubinsPath(car)
 
     # shortest obstacle-free dubins path
+    t = time()
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
     route, safe = dubins.best_tangent(solutions)
+
+    print('Total time: {}s'.format(round(time()-t, 3)))
 
     if not safe:
         print('No valid dubins path!')

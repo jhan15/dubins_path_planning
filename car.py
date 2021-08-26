@@ -15,10 +15,9 @@ from time import time
 
 class State:
 
-    def __init__(self, pos, vertex, model):
+    def __init__(self, pos, model):
 
         self.pos = pos
-        self.vertex = vertex
         self.model = model
 
 
@@ -63,8 +62,8 @@ class SimpleCar:
 
         return pos
     
-    def get_car_state(self, pos, phi=0):
-        """ Get the car state according to the pos and steering angle. """
+    def get_car_bounding(self, pos):
+        """ Get the bounding rectangle of car. """
 
         x, y, theta = pos
 
@@ -72,6 +71,18 @@ class SimpleCar:
         self.c2 = transform(x, y, 1.3*self.l, 0.4*self.l, theta, 2)
         self.c3 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 3)
         self.c4 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 4)
+
+        vertex = [self.c1.tolist(), self.c2.tolist(), self.c4.tolist(), self.c3.tolist()]
+
+        return vertex
+    
+    def get_car_state(self, pos, phi=0):
+        """ Get the car state according to the pos and steering angle. """
+        
+        x, y, theta = pos
+
+        pos = [x, y, theta]
+        self.get_car_bounding(pos)
 
         c_      = transform(x, y, self.l, 0.2*self.l, theta, 1)
         self.w1 = transform(c_[0], c_[1], 0.2*self.l, 0.1*self.l, theta+phi, 4)
@@ -81,10 +92,6 @@ class SimpleCar:
         
         self.w3 = transform(x, y, 0.2*self.l, 0.1*self.l, theta, 3)
         self.w4 = transform(x, y, 0.2*self.l, 0.3*self.l, theta, 4)
-
-        pos = [x, y, theta]
-        
-        vertex = [self.c1.tolist(), self.c2.tolist(), self.c4.tolist(), self.c3.tolist()]
         
         model = [
             Rectangle(self.c4, self.carl, self.carw, degrees(theta), fc='y', ec='k'),
@@ -95,7 +102,7 @@ class SimpleCar:
             Arrow(x, y, 1.1*self.carl*cos(theta), 1.1*self.carl*sin(theta), width=0.1, color='r')
         ]
 
-        state = State(pos, vertex, model)
+        state = State(pos, model)
 
         return state
     
@@ -107,8 +114,8 @@ class SimpleCar:
         dy     = sin(theta)
         dtheta = tan(phi) / self.l
 
-        x += dt*dx
-        y += dt*dy
+        x     += dt*dx
+        y     += dt*dy
         theta += dt*dtheta
 
         return [x, y, theta]
