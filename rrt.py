@@ -24,16 +24,6 @@ class Node:
         self.phi = phi
         self.steps = steps
         self.parent = None
-
-
-class SimpleState:
-    """ Hash function for tree nodes. """
-
-    def __init__(self, node):
-
-        self.pos = node.pos
-        self.phi = node.phi
-        self.steps = node.steps
     
     def __eq__(self, other):
 
@@ -97,7 +87,6 @@ class RRT:
         """ Search path, return controls. """
 
         nodes = [self.start]
-        states = [SimpleState(self.start)]
         final_node = None
         
         count = 0
@@ -132,17 +121,16 @@ class RRT:
                 continue
             
             new_node = Node(pos, phi, i+1)
-            new_state = SimpleState(new_node)
             
-            if new_state in states:
+            if new_node in nodes:
                 continue
             
-            states.append(new_state)
             new_node.parent = nearest
             nodes.append(new_node)
         
         route = self.backtracking(final_node) + dubins_route
         path = self.car.get_path(self.car.start_pos, route)
+        print('Total iteration:', count)
         
         return path
 

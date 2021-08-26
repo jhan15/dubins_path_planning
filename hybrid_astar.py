@@ -28,22 +28,9 @@ class Node:
         self.parent = None
         self.phi = None
 
-
-class State:
-    """ Hash function for tree nodes. """
-
-    def __init__(self, node):
-
-        self.grid_pos = node.grid_pos
-        self.pos = node.pos
-        self.g = node.g
-        self.f = node.f
-        self.parent = node.parent
-        self.phi = node.phi
-    
     def __eq__(self, other):
 
-        return (self.grid_pos == other.grid_pos)
+        return self.grid_pos == other.grid_pos
     
     def __hash__(self):
 
@@ -53,14 +40,14 @@ class State:
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40, dt=1e-2, check_dubins=1):
+    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40, dt=1e-2, t=2000):
         
         self.car = car
         self.grid = grid
         self.unit_theta = unit_theta
         self.drive_steps = drive_steps
         self.dt = dt
-        self.check_dubins = check_dubins
+        self.t = t
 
         self.start = self.car.start_pos
         self.goal = self.car.end_pos
@@ -102,8 +89,17 @@ class HybridAstar:
 
         children = []
         for phi in self.phil:
-            
+
             pos = node.pos
+
+            # if phi == 0:
+            #     for _ in range(self.drive_steps):
+            #         pos = self.car.step(pos, phi)
+
+            #     safe = self.dubins.is_straight_route_safe(node.pos, pos)
+            
+            # else:
+            
             for _ in range(self.drive_steps):
                 pos = self.car.step(pos, phi)
                 safe = self.car.is_pos_safe(pos, self.lookup)
@@ -140,7 +136,7 @@ class HybridAstar:
         root.f = root.g + self.heuristic_cost(root.pos)
 
         closed_ = []
-        open_ = [State(root)]
+        open_ = [root]
 
         count = 0
         while open_:
@@ -151,31 +147,32 @@ class HybridAstar:
             closed_.append(best)
 
             # check dubins path
-            self.check_dubins = max(1, int(2000/count))
-            if count % self.check_dubins == 0:
+            check_dubins = max(1, int(self.t/count))
+
+            if count % check_dubins == 0:
                 solutions = self.dubins.find_tangents(best.pos, self.goal)
                 dubins_route, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
                     route = self.backtracking(best) + dubins_route
                     path = self.car.get_path(self.start, route)
+                    print('Total iteration:', count)
                     
                     return path
 
-            # construct neighbors
             children = self.get_children(best)
 
             for child in children:
-                state = State(child)
 
-                if state in closed_:
+                if child in closed_:
                     continue
 
-                if state not in open_:
-                    open_.append(state)
-                elif state.g < open_[open_.index(state)].g:
-                    open_.remove(state)
-                    open_.append(state)
+                if child not in open_:
+                    open_.append(child)
+
+                elif child.g < open_[open_.index(child)].g:
+                    open_.remove(child)
+                    open_.append(child)
 
         return None
 

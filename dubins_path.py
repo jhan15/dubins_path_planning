@@ -172,7 +172,7 @@ class DubinsPath:
         for s in solutions:
             route = self.get_route(s)
 
-            safe = self.is_tangent_route_safe(route[0][0], route[1][0])
+            safe = self.is_straight_route_safe(route[0][0], route[1][0])
             if not safe:
                 continue
 
@@ -189,7 +189,7 @@ class DubinsPath:
         
         return route, safe
     
-    def is_tangent_route_safe(self, t1, t2):
+    def is_straight_route_safe(self, t1, t2):
         """ Consider the tangent route as a long rectangle and quickly check safety. """
 
         vertex1 = self.car.get_car_bounding(t1)

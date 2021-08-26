@@ -13,7 +13,7 @@ class Params:
 
 class Lookup:
 
-    def __init__(self, car, unit_theta=pi/36):
+    def __init__(self, car, unit_theta=pi/180):
 
         self.car = car
         self.unit_theta = unit_theta
