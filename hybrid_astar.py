@@ -1,4 +1,4 @@
-from math import pi, tan, sin
+from math import pi, tan
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -11,7 +11,7 @@ from environment import Environment
 from dubins_path import DubinsPath
 from lookup import Lookup
 from test_cases.cases import TestCase
-from utils.utils import distance, plot_a_car, mod_angle, get_discretized_thetas, round_theta
+from utils.utils import distance, plot_a_car, get_discretized_thetas, round_theta
 
 from time import time
 
@@ -68,7 +68,7 @@ class HybridAstar:
         pt = pos[:2]
 
         if root:
-            theta = mod_angle(theta)
+            theta = theta % (2*pi)
         
         theta = round_theta(theta, self.thetas)
         
@@ -92,20 +92,16 @@ class HybridAstar:
 
             pos = node.pos
 
-            # if phi == 0:
-            #     for _ in range(self.drive_steps):
-            #         pos = self.car.step(pos, phi)
-
-            #     safe = self.dubins.is_straight_route_safe(node.pos, pos)
-            
-            # else:
-            
             for _ in range(self.drive_steps):
                 pos = self.car.step(pos, phi)
-                safe = self.car.is_pos_safe(pos, self.lookup)
 
-                if not safe:
-                    break
+            # check safety of route-----------------------
+            if phi == 0:
+                safe = self.dubins.is_straight_route_safe(node.pos, pos)
+            else:
+                d, c, r = self.car.get_params(node.pos, phi)
+                safe = self.dubins.is_turning_route_safe(node.pos, pos, d, c, r)
+            # --------------------------------------------
             
             if not safe:
                 continue
@@ -180,9 +176,13 @@ class HybridAstar:
 def main(grid_on=True):
 
     tc = TestCase()
+
     env = Environment(tc.obs3)
+
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
+
     grid = Grid(env)
+    
     hastar = HybridAstar(car, grid)
 
     t = time()

@@ -1,4 +1,5 @@
 from obstacle import Obstacle
+from utils.intersection import rectangle_ringsector_intersected
 
 
 class Environment:
@@ -14,10 +15,10 @@ class Environment:
         else:
             self.obs = []
     
-    def inbounds(self, vertex, safe_dis=0.1):
-        """ Check target within the map bounds. """
+    def rectangle_inbounds(self, rect, safe_dis=0.1):
+        """ Check rectangle target within the map bounds. """
 
-        for v in vertex:
+        for v in rect:
             if v[0] < safe_dis:
                 return False
             if v[0] > self.lx - safe_dis:
@@ -28,20 +29,47 @@ class Environment:
                 return False
         
         return True
+    
+    def ringsector_inbounds(self, rs, safe_dis=0.1):
+        """ Check ringsector target within the map bounds. """
 
-    def obstacle_free(self, vertex):
-        """ Check target is obstacle-free or not. """
+        rect = [[0+safe_dis,        0+safe_dis],
+                [self.lx-safe_dis,  0+safe_dis],
+                [self.lx-safe_dis,  self.ly-safe_dis],
+                [0+safe_dis,        self.ly-safe_dis]]
+        
+        return not rectangle_ringsector_intersected(rect, rs, False)
+
+    def rectangle_obstacle_free(self, rect):
+        """ Check rectangle target is obstacle-free or not. """
 
         for ob in self.obs:
-            if not ob.safe(vertex):
+            if not ob.rectangle_safe(rect):
+                return False
+        
+        return True
+    
+    def ringsector_obstacle_free(self, rs):
+        """ Check ringsector target is obstacle-free or not. """
+
+        for ob in self.obs:
+            if not ob.ringsector_safe(rs):
                 return False
         
         return True
 
-    def safe(self, vertex):
-        """ Check target is safe or not. """
+    def rectangle_safe(self, rect):
+        """ Check rectangle target is safe or not. """
 
-        if self.inbounds(vertex) and self.obstacle_free(vertex):
+        if self.rectangle_inbounds(rect) and self.rectangle_obstacle_free(rect):
+            return True
+        
+        return False
+    
+    def ringsector_safe(self, rs):
+        """ Check ringsector target is safe or not. """
+
+        if self.ringsector_inbounds(rs) and self.ringsector_obstacle_free(rs):
             return True
         
         return False

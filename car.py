@@ -61,6 +61,19 @@ class SimpleCar:
                 break
 
         return pos
+
+    def get_params(self, pos, phi):
+        """ Get parameters for turning route. """
+
+        x, y, theta = pos
+
+        r = self.l / abs(tan(phi))
+        d = 1 if phi > 0 else -1
+        id = 1 if phi > 0 else 2
+
+        c = transform(x, y, 0, r, theta, id)
+
+        return d, c, r
     
     def get_car_bounding(self, pos):
         """ Get the bounding rectangle of car. """
@@ -125,7 +138,7 @@ class SimpleCar:
 
         lookup_vertex = lookup.transform_state(pos)
 
-        return self.env.safe(lookup_vertex)
+        return self.env.rectangle_safe(lookup_vertex)
     
     def is_route_safe(self, pos, route, lookup):
         """ Check route safety by lookup table. """
@@ -190,13 +203,10 @@ class SimpleCar:
 
 def main():
 
-    # test cases
     tc = TestCase()
 
-    # map w/ obstacles
     env = Environment()
 
-    # car w/ initial and target poses
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 
     # example controls to demonstrate car dynamics

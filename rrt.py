@@ -92,6 +92,7 @@ class RRT:
         count = 0
         while True:
             count += 1
+
             if count % self.pick_target == 0:
                 pick = self.goal.pos[:2]
             else:
@@ -112,10 +113,14 @@ class RRT:
             
             for i in range(self.max_steps):
                 pos = self.car.step(pos, phi)
-                safe = self.car.is_pos_safe(pos, self.lookup)
-
-                if not safe:
-                    break
+            
+            # check safety of route-----------------------
+            if phi == 0:
+                safe = self.dubins.is_straight_route_safe(nearest.pos, pos)
+            else:
+                d, c, r = self.car.get_params(nearest.pos, phi)
+                safe = self.dubins.is_turning_route_safe(nearest.pos, pos, d, c, r)
+            # --------------------------------------------
             
             if not safe:
                 continue
@@ -137,19 +142,14 @@ class RRT:
 
 def main():
 
-    # test cases
     tc = TestCase()
 
-    # map w/ obstacles
     env = Environment(tc.obs3)
 
-    # car w/ initial and target poses
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 
-    # RRT + Dubins path
     rrt = RRT(car)
 
-    # pathfinding
     t = time()
 
     path = rrt.search_path()

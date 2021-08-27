@@ -9,7 +9,7 @@ from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
 from lookup import Lookup
-from utils.utils import transform, directional_theta, plot_a_car
+from utils.utils import transform, directional_theta, plot_a_car, distance
 
 from time import time
 
@@ -19,10 +19,12 @@ class Params:
 
     def __init__(self, d):
 
-        self.d = d
-        self.t1 = None
-        self.t2 = None
-        self.len = None
+        self.d = d      # dubins type
+        self.t1 = None  # first tangent point
+        self.t2 = None  # second tangent point
+        self.c1 = None  # first center point
+        self.c2 = None  # second center point
+        self.len = None # total travel distance
 
 
 class DubinsPath:
@@ -94,6 +96,8 @@ class DubinsPath:
 
         dub.t1 = t1.tolist() + [theta]
         dub.t2 = t2.tolist() + [theta]
+        dub.c1 = c1
+        dub.c2 = c2
         dub.len = arc1 + tangent + arc2
         
         return dub
@@ -169,18 +173,21 @@ class DubinsPath:
     def best_tangent(self, solutions):
         """ Get the shortest obstacle-free dubins path. """
 
+        pos0 = self.start_pos
+        pos1 = self.end_pos
+        
         for s in solutions:
             route = self.get_route(s)
 
-            safe = self.is_straight_route_safe(route[0][0], route[1][0])
+            safe = self.is_straight_route_safe(s.t1, s.t2)
             if not safe:
                 continue
 
-            safe = self.car.is_route_safe(self.start_pos, [route[0]], self.lookup)
+            safe = self.is_turning_route_safe(pos0, s.t1, s.d[0], s.c1, self.r)
             if not safe:
                 continue
 
-            safe = self.car.is_route_safe(route[1][0], [route[2]], self.lookup)
+            safe = self.is_turning_route_safe(s.t2, pos1, s.d[1], s.c2, self.r)
             if not safe:
                 continue
 
@@ -190,14 +197,71 @@ class DubinsPath:
         return route, safe
     
     def is_straight_route_safe(self, t1, t2):
-        """ Consider the tangent route as a long rectangle and quickly check safety. """
+        """ Check a straight route is safe. """
+        # a straight route is simply a rectangle
 
         vertex1 = self.car.get_car_bounding(t1)
         vertex2 = self.car.get_car_bounding(t2)
 
         vertex = [vertex2[0], vertex2[1], vertex1[3], vertex1[2]]
 
-        return self.car.env.safe(vertex)
+        return self.car.env.rectangle_safe(vertex)
+    
+    def is_turning_route_safe(self, start_pos, end_pos, d, c, r):
+        """ Check if a turning route is safe. """
+        # a turning_route is decomposed into:
+        #   1. start_pos (checked previously as end_pos)
+        #   2. end_pos
+        #   3. inner ringsector
+        #   4. outer ringsector
+
+        if not self.car.is_pos_safe(end_pos, self.lookup):
+            return False
+        
+        rs_inner, rs_outer = self.construct_ringsectors(start_pos, end_pos, d, c, r)
+        
+        if not self.car.env.ringsector_safe(rs_inner):
+            return False
+        
+        if not self.car.env.ringsector_safe(rs_outer):
+            return False
+
+        return True
+    
+    def construct_ringsectors(self, start_pos, end_pos, d, c, r):
+        """ Construct inner and outer ringsectors of a turning route. """
+        
+        x, y, theta = start_pos
+
+        delta_theta = end_pos[2] - theta
+
+        p_inner = start_pos[:2]
+        p_outer = transform(x, y, 1.3*self.car.l, 0.4*self.car.l, theta, 1)
+
+        r_inner = r - self.car.carw / 2
+        r_outer = distance(p_outer, c)
+
+        v_inner = [p_inner[0]-c[0], p_inner[1]-c[1]]
+        v_outer = [p_outer[0]-c[0], p_outer[1]-c[1]]
+
+        if d == -1:
+            end_inner = atan2(v_inner[1], v_inner[0]) % (2*pi)
+            start_inner = (end_inner + delta_theta) % (2*pi)
+
+            end_outer = atan2(v_outer[1], v_outer[0]) % (2*pi)
+            start_outer = (end_outer + delta_theta) % (2*pi)
+        
+        if d == 1:
+            start_inner = atan2(v_inner[1], v_inner[0]) % (2*pi)
+            end_inner = (start_inner + delta_theta) % (2*pi)
+
+            start_outer = atan2(v_outer[1], v_outer[0]) % (2*pi)
+            end_outer = (start_outer + delta_theta) % (2*pi)
+        
+        rs_inner = [c[0], c[1], r_inner, r, start_inner, end_inner]
+        rs_outer = [c[0], c[1], r, r_outer, start_outer, end_outer]
+
+        return rs_inner, rs_outer
     
     def get_route(self, s):
         """ Get the route of dubins path. """
@@ -213,19 +277,14 @@ class DubinsPath:
 
 def main():
 
-    # test cases
     tc = TestCase()
 
-    # map w/ obstacles
     env = Environment(tc.obs1)
 
-    # car w/ initial and target poses
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 
-    # dubins path
     dubins = DubinsPath(car)
 
-    # shortest obstacle-free dubins path
     t = time()
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
     route, safe = dubins.best_tangent(solutions)

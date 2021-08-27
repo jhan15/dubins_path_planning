@@ -2,10 +2,22 @@ from math import sin, cos, atan2, pi, sqrt
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle
+from matplotlib.collections import LineCollection
 from time import time
 
 
+# intersection: cross of edge
+# overlapping: overlap of area (could be no cross of edge, i.e. a contains b)
+
+
+def distance(p1, p2):
+    """ Distance of two points. """
+    
+    return sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
+
 def triangle_area(a, b, c):
+    """ Calculate the area of a triangle. """
 
     z1 = b[0]*a[1] - a[0]*b[1]
     z2 = c[0]*b[1] - b[0]*c[1]
@@ -15,6 +27,7 @@ def triangle_area(a, b, c):
 
 
 def point_line_distance(a, line):
+    """ Calculate the distance of point to a line. """
 
     a = np.array(a)
     line = np.array(line)
@@ -67,22 +80,28 @@ def circle_in_rectangle(circle, rect):
 
 
 def separated(line, obj1, obj2):
+    """ Two objects are separated by a line. """
 
     p1, p2 = line
-    obj1 = np.array(obj1)
-    obj2 = np.array(obj2)
+    normal = [p2[1]-p1[1], p1[0]-p2[0]]
 
-    normal = np.array([p2[1]-p1[1], p1[0]-p2[0]])
+    amin, amax = None, None
+    for v in obj1:
+        projected = normal[0]*v[0]+normal[1]*v[1]
+        if (amin is None) or (projected < amin):
+            amin = projected
 
-    dotl = []
-    for p in obj1:
-        dotl.append(normal @ p)
-    amin, amax = min(dotl), max(dotl)
+        if (amax is None) or (projected > amax):
+            amax = projected
+    
+    bmin, bmax = None, None
+    for v in obj2:
+        projected = normal[0]*v[0]+normal[1]*v[1]
+        if (bmin is None) or (projected < bmin):
+            bmin = projected
 
-    dotl = []
-    for p in obj2:
-        dotl.append(normal @ p)
-    bmin, bmax = min(dotl), max(dotl)
+        if (bmax is None) or (projected > bmax):
+            bmax = projected
 
     if (amax < bmin) or (bmax < amin):
         return True
@@ -90,18 +109,18 @@ def separated(line, obj1, obj2):
     return False
 
 
-def polygons_intersected(polya, polyb):
+def polygons_overlapping(polya, polyb):
 
-    polygons = np.array([polya, polyb])
+    polygons = [polya, polyb]
 
     for polygon in polygons:
 
         for i in range(len(polygon)):
 
             j = (i + 1) % len(polygon)
-            edge = [polygon[i], polygon[j]]
+            line = [polygon[i], polygon[j]]
 
-            if separated(edge, polya, polyb):
+            if separated(line, polya, polyb):
                 return False
 
     return True
@@ -109,8 +128,18 @@ def polygons_intersected(polya, polyb):
 
 def line_rectangle_intersected(line, rect):
 
-    line = np.array(line)
-    rect = np.array(rect)
+    for i in range(len(rect)):
+
+        j = (i + 1) % len(rect)
+        edge = [rect[i], rect[j]]
+        
+        if not (separated(edge, edge, line) or separated(line, edge, line)):
+            return True
+    
+    return False
+
+
+def line_rectangle_overlapping(line, rect):
 
     if separated(line, rect, line):
         return False
@@ -132,15 +161,15 @@ def line_circle_intersected(line, circle):
 
     nodes = []
 
-    q, r = np.array(circle[:2]), circle[2]
-    p1, p2 = np.array(line[0]), np.array(line[1])
+    q, r = circle[:2], circle[2]
+    p1, p2 = line
 
-    v1 = p2 - p1
-    v2 = p1 - q
-    
-    a = v1 @ v1
-    b = 2 * v1 @ v2
-    c = p1 @ p1 + q @ q - 2 * p1 @ q - r**2
+    v1 = [p2[0]-p1[0], p2[1]-p1[1]]
+    v2 = [p1[0]-q[0], p1[1]-q[1]]
+
+    a = v1[0]**2 + v1[1]**2
+    b = 2 * (v1[0]*v2[0] + v1[1]*v2[1])
+    c = (p1[0]**2 + p1[1]**2) + (q[0]**2 + q[1]**2) - 2*(p1[0]*q[0] + p1[1]*q[1]) - r**2
 
     disc = b**2 - 4 * a * c
 
@@ -154,15 +183,15 @@ def line_circle_intersected(line, circle):
         return False, nodes
     
     if 0 <= t1 <= 1:
-        nodes.append(p1 + t1*v1)
+        nodes.append([p1[0]+t1*v1[0], p1[1]+t1*v1[1]])
     
     if 0 <= t2 <= 1:
-        nodes.append(p1 + t2*v1)
+        nodes.append([p1[0]+t2*v1[0], p1[1]+t2*v1[1]])
     
     return True, nodes
 
 
-def rectangle_circle_intersected(rect, circle):
+def rectangle_circle_overlapping(rect, circle):
 
     # if circle's center inside rectangle
     # if rectangle's edge intersected with circle
@@ -189,23 +218,22 @@ def rectangle_arc_intersected(rect, arc):
 
     # arc: [x, y, r, start, end]
 
-    circle = arc[:3]
-    q = np.array(arc[:2])
-    start, end = arc[3], arc[4]
-
     for i in range(len(rect)):
 
         j = (i + 1) % len(rect)
         line = [rect[i], rect[j]]
 
-        result, nodes = line_circle_intersected(line, circle)
+        result, nodes = line_circle_intersected(line, arc[:3])
 
         if result:
             for node in nodes:
-                v = node - q
+                v = [node[0]-arc[0], node[1]-arc[1]]
                 theta = atan2(v[1], v[0]) % (2*pi)
+
+                if arc[3] < arc[4] and arc[3] <= theta <= arc[4]:
+                    return True
                 
-                if start <= theta <= end or not end < theta < start:
+                if arc[3] > arc[4] and not arc[4] < theta <arc[3]:
                     return True
     
     return False
@@ -215,51 +243,33 @@ def rectangle_in_ringsector(rect, rs):
 
     # rs: [x, y, rmin, rmax, start, end]
     # if all center-vertex distance within [rmin, rmax] and theta within [start, end]
-
-    q = np.array(rs[:2])
-    rmin, rmax = rs[2], rs[3]
-    start, end = rs[4], rs[5]
-    rect = np.array(rect)
-
-    print(start, end)
     
     for p in rect:
-        v = p - q
+        v = [p[0]-rs[0], p[1]-rs[1]]
+        d = distance(p, rs[:2])
 
-        d = np.linalg.norm(v)
-        if d >= rmax or d <= rmin:
+        if d >= rs[3] or d <= rs[2]:
             return False
         
         theta = atan2(v[1], v[0]) % (2*pi)
-        if not start < theta < end or end <= theta <= start:
+
+        if rs[4] < rs[5] and not rs[4] < theta < rs[5]:
+            return False
+
+        if rs[4] > rs[5] and rs[5] <= theta <= rs[4]:
             return False
 
     return True
 
 
-def rectangle_ringsector_intersected(rect, rs):
+def rectangle_ringsector_intersected(rect, rs, edge=True):
 
-    # rs: [x, y, rmin, rmax, start, end]
+    # rs: [x, y, rmin, rmax, sta, end]
     # if rect in ringsector
-    # if rect intersected with any arc
+    # if rect intersected with any arc/edge
 
     arc1 = rs[:3] + rs[-2:]
     arc2 = rs[:2] + rs[-3:]
-
-    x, y = rs[0], rs[1]
-    rmin, rmax = rs[2], rs[3]
-    start, end = rs[4], rs[5]
-
-    p1 = [x+rmin*cos(start), y+rmin*sin(start)]
-    p2 = [x+rmax*cos(start), y+rmax*sin(start)]
-    p3 = [x+rmin*cos(end), y+rmin*sin(end)]
-    p4 = [x+rmax*cos(end), y+rmax*sin(end)]
-
-    if line_rectangle_intersected([p1,p2], rect):
-        return True
-    
-    if line_rectangle_intersected([p3,p4], rect):
-        return True
 
     if rectangle_in_ringsector(rect, rs):
         return True
@@ -269,78 +279,55 @@ def rectangle_ringsector_intersected(rect, rs):
     
     if rectangle_arc_intersected(rect, arc2):
         return True
+    
+    if edge:
+        p1 = [rs[0] + rs[2]*cos(rs[4]), rs[1] + rs[2]*sin(rs[4])]
+        p2 = [rs[0] + rs[3]*cos(rs[4]), rs[1] + rs[3]*sin(rs[4])]
+        p3 = [rs[0] + rs[2]*cos(rs[5]), rs[1] + rs[2]*sin(rs[5])]
+        p4 = [rs[0] + rs[3]*cos(rs[5]), rs[1] + rs[3]*sin(rs[5])]
+        
+        if line_rectangle_intersected([p1, p2], rect):
+            return True
+
+        if line_rectangle_intersected([p3, p4], rect):
+            return True
 
     return False
 
 
+def rs_params(rs):
+    p1 = [rs[0] + rs[2]*cos(rs[4]), rs[1] + rs[2]*sin(rs[4])]
+    p2 = [rs[0] + rs[3]*cos(rs[4]), rs[1] + rs[3]*sin(rs[4])]
+    p3 = [rs[0] + rs[2]*cos(rs[5]), rs[1] + rs[2]*sin(rs[5])]
+    p4 = [rs[0] + rs[3]*cos(rs[5]), rs[1] + rs[3]*sin(rs[5])]
+    return [p1, p2, p3, p4]
+
+
 def main():
 
-    rect = [[4,2],[5,2],[5,4],[4,4]]
-    line1 = [[3.5,1.5],[5.5,3]]
-    line2 = [[4.5,2.5],[4.8,3.6]]
-    line3 = [[4.5,2.5],[3.5,5]]
-    line4 = [[3.5,3.8],[4.5,4.5]]
+    rs = [1, 1, 1, 2, 7*pi/4, pi/6]
+    rect1 = [[3,-1],[4,-1],[4,0],[3,0]]
+    rect2 = [[2,1],[4,1],[4,3],[2,3]]
 
-    # print(line_rectangle_intersected(line1, rect))
-    # print(line_rectangle_intersected(line2, rect))
-    # print(line_rectangle_intersected(line3, rect))
-    # print(line_rectangle_intersected(line4, rect))
+    print(rectangle_ringsector_intersected(rect1, rs))
+    print(rectangle_ringsector_intersected(rect2, rs))
 
-
-    rs = [1,1,1,2,pi/4,pi/2]
-    rect1 = [[2.5,1], [3.5,2], [2.5,3], [1.5,2]]
-    rect2 = [[1.2,2.2], [1.5,2.2], [1.5,2.5], [1.2,2.5]]
-    rect3 = [[1.4,2], [2,2], [2,2.8], [1.4,2.8]]
-    rect4 = [[2.5,1.5], [3,2], [2.5,2.5], [2,2]]
-    rect5 = [[2.2,1.8], [2.4,2], [2.2,2.2], [2,2]]
-
-    print(polygons_intersected(rect1, rect2))
-    print(polygons_intersected(rect1, rect3))
-    print(polygons_intersected(rect2, rect3))
-    print(polygons_intersected(rect1, rect4))
-
-    print(polygons_intersected(rect, rect1))
-    print(polygons_intersected(rect, rect2))
-    print(polygons_intersected(rect, rect3))
-
-    # print(rectangle_in_ringsector(rect1, rs))
-    # print(rectangle_ringsector_intersected(rect1, rs))
-
-    # print(rectangle_in_ringsector(rect2, rs))
-    # print(rectangle_ringsector_intersected(rect2, rs))
-
-    # print(rectangle_in_ringsector(rect3, rs))
-    # print(rectangle_ringsector_intersected(rect3, rs))
-
-    # print(rectangle_in_ringsector(rect4, rs))
-    # print(rectangle_ringsector_intersected(rect4, rs))
-
-    # print(rectangle_in_ringsector(rect5, rs))
-    # print(rectangle_ringsector_intersected(rect5, rs))
+    ps = rs_params(rs)
+    segs = [ps[:2], ps[-2:]]
 
     fig, ax = plt.subplots(figsize=(6,6))
-    ax.set_xlim(-2, 6)
-    ax.set_ylim(-2, 6)
+    ax.set_xlim(-2, 5)
+    ax.set_ylim(-2, 4)
     ax.set_aspect("equal")
-    ax.set_xticks([])
-    ax.set_yticks([])
 
-    ax.plot([1,1+sqrt(2)], [1,1+sqrt(2)])
-    ax.plot([1,1], [1,3])
+    ax.add_patch(Circle((1,1), 2, fc='None', ec='k'))
+    ax.add_patch(Circle((1,1), 1, fc='None', ec='k'))
     
-    ax.add_patch(Circle((1,1), 2, fc='y', ec='k'))
-    ax.add_patch(Circle((1,1), 1, fc='w', ec='k'))
-    ax.add_patch(Rectangle((2.5,1), sqrt(2), sqrt(2), 45, fc='None', ec='k'))
-    ax.add_patch(Rectangle((1.2,2.2), 0.3, 0.3, 0, fc='None', ec='k'))
-    ax.add_patch(Rectangle((1.4,2), 0.6, 0.8, 0, fc='None', ec='k'))
-    ax.add_patch(Rectangle((2.5,1.5), sqrt(2)/2, sqrt(2)/2, 45, fc='None', ec='k'))
-    ax.add_patch(Rectangle((2.2,1.8), sqrt(0.08), sqrt(0.08), 45, fc='None', ec='k'))
-
-    ax.add_patch(Rectangle((4,2), 1, 2, 0, fc='None', ec='k'))
-    ax.plot([3.5,5.5], [1.5,3])
-    ax.plot([4.5,4.8], [2.5,3.6])
-    ax.plot([4.5,3.5], [2.5,5])
-    ax.plot([3.5,4.5], [3.8,4.5])
+    ax.add_patch(Rectangle((3,-1),1,1,0, fc='None', ec='m', linewidth=2))
+    ax.add_patch(Rectangle((2,1),2,2,0, fc='None', ec='m', linewidth=2))
+    c = ['r', 'b']
+    lc = LineCollection(segs, color=c, linewidth=2)
+    ax.add_collection(lc)
 
     plt.show()
 

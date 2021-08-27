@@ -1,6 +1,6 @@
 from math import pi
 
-from utils.utils import get_discretized_thetas, round_theta, mod_angle
+from utils.utils import get_discretized_thetas, round_theta
 
 
 class Params:
@@ -34,7 +34,7 @@ class Lookup:
     
     def transform_state(self, pos):
 
-        theta = mod_angle(pos[2])
+        theta = pos[2] % (2*pi)
         theta = round_theta(theta, self.thetas)
         param = next((p for p in self.lookup if p.theta == theta), None)
 
