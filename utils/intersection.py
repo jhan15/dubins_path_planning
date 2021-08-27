@@ -11,13 +11,13 @@ from time import time
 
 
 def distance(p1, p2):
-    """ Distance of two points. """
+    """ Euclidean distance between two points. """
     
     return sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 
 def triangle_area(a, b, c):
-    """ Calculate the area of a triangle. """
+    """ Calculate area of a triangle. """
 
     z1 = b[0]*a[1] - a[0]*b[1]
     z2 = c[0]*b[1] - b[0]*c[1]
@@ -27,20 +27,20 @@ def triangle_area(a, b, c):
 
 
 def point_line_distance(a, line):
-    """ Calculate the distance of point to a line. """
+    """ Shortest distance from point to a line. """
 
-    a = np.array(a)
-    line = np.array(line)
+    v1 = [line[1][0]-line[0][0], line[1][1]-line[0][1]]
+    v2 = [line[0][0]-a[0], line[0][1]-a[1]]
 
-    v1 = line[1] - line[0]
-    v2 = line[0] - a
+    d = distance(line[0], line[1])
 
-    l = np.linalg.norm(v1)
+    cross = v1[0]*v2[1] - v2[0]*v1[1]
 
-    return abs(np.cross(v1, v2)) / l
+    return abs(cross) / d
 
 
 def point_in_rectangle(a, rect):
+    """ Check a point inside a rectangle. """
 
     area = 0
 
@@ -61,6 +61,7 @@ def point_in_rectangle(a, rect):
 
 
 def circle_in_rectangle(circle, rect):
+    """ Check a circle inside a rectangle. """
 
     p = circle[:2]
     r = circle[2]
@@ -110,6 +111,7 @@ def separated(line, obj1, obj2):
 
 
 def polygons_overlapping(polya, polyb):
+    """ Check polygons overlapping. """
 
     polygons = [polya, polyb]
 
@@ -127,6 +129,7 @@ def polygons_overlapping(polya, polyb):
 
 
 def line_rectangle_intersected(line, rect):
+    """ Check line segment intersected with a rectangle. """
 
     for i in range(len(rect)):
 
@@ -140,6 +143,7 @@ def line_rectangle_intersected(line, rect):
 
 
 def line_rectangle_overlapping(line, rect):
+    """ Check line segment overlapping with a rectangle. """
 
     if separated(line, rect, line):
         return False
@@ -156,6 +160,7 @@ def line_rectangle_overlapping(line, rect):
 
 
 def line_circle_intersected(line, circle):
+    """ Check line segment intersected with a circle. """
 
     # https://codereview.stackexchange.com/questions/86421/line-segment-to-circle-collision-algorithm
 
@@ -192,6 +197,7 @@ def line_circle_intersected(line, circle):
 
 
 def rectangle_circle_overlapping(rect, circle):
+    """ Check rectangle overlapping with a circle. """
 
     # if circle's center inside rectangle
     # if rectangle's edge intersected with circle
@@ -215,6 +221,7 @@ def rectangle_circle_overlapping(rect, circle):
 
 
 def rectangle_arc_intersected(rect, arc):
+    """ Check rectangle intersected with an arc. """
 
     # arc: [x, y, r, start, end]
 
@@ -240,6 +247,7 @@ def rectangle_arc_intersected(rect, arc):
 
 
 def rectangle_in_ringsector(rect, rs):
+    """ Check a rectangle inside a ringsector. """
 
     # rs: [x, y, rmin, rmax, start, end]
     # if all center-vertex distance within [rmin, rmax] and theta within [start, end]
@@ -263,6 +271,7 @@ def rectangle_in_ringsector(rect, rs):
 
 
 def rectangle_ringsector_intersected(rect, rs, edge=True):
+    """ Check rectangle intersected with a ringsector. """
 
     # rs: [x, y, rmin, rmax, sta, end]
     # if rect in ringsector

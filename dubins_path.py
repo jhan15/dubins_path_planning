@@ -35,7 +35,6 @@ class DubinsPath:
     - RSL
     - RSR
     and find the shortest obstacle-free one.
-    To achieve a reasonable accuracy, set dt=1e-4.
     """
 
     def __init__(self, car):
