@@ -6,7 +6,7 @@
 
 In this project, we implemented car path planning with two algorithm configurations
 
-```python
+```bash
 Model_1
 ├── RRT: branching
 └── Dubins path: final shot
