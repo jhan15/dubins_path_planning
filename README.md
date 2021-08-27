@@ -4,19 +4,7 @@
 
 # dubins_path_planning
 
-In this project, we implemented car path planning with RRT, Hybrid A*, and Dubins Path algorithms.
-
-```bash
-Algorithm_1
-├── RRT: branching
-└── Dubins path: final shot
-
-Algorithm_2
-├── Hybrid A*: branching
-└── Dubins path: final shot
-```
-
-The car model is
+In this project, we implemented car path planning with RRT, Hybrid A*, and Dubins Path algorithms. The car model is
 
 <p align="center">
   <img src="https://github.com/jhan15/dubins_path_planning/blob/master/images/car_model.png?raw=true" width="300">
@@ -37,6 +25,17 @@ The state variables are:
 
 The control variable is:
  - `phi ∈ [-pi/4, pi/4]`: steering angle (w.r.t. the direction of travel).
+
+The algorithms are:
+```bash
+Algorithm_1
+├── RRT: branching
+└── Dubins path: final shot
+
+Algorithm_2
+├── Hybrid A*: branching
+└── Dubins path: final shot
+```
 
 ## Usage
 
