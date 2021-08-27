@@ -50,17 +50,17 @@ $ python3 hybrid_astar.py
 #### Shortest obstacle-free Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130496974-a36ccf19-6248-405c-a7fe-b19d86ef798f.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/131178331-59925cc4-12ec-48c8-bb06-365731384238.gif?raw=true" width="500">
 </p>
 
 #### Pathfinding w/ RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130496983-a1f88c80-8993-43db-9533-0cc72c060139.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/131178310-022056a3-c6f1-46f7-abb9-61019e9e4e72.gif?raw=true" width="500">
 </p>
 
 #### Pathfinding w/ Hybrid A* + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/130496983-a1f88c80-8993-43db-9533-0cc72c060139.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/131178320-4c993399-3121-4092-8061-09336b5e36f8.gif?raw=true" width="500">
 </p>
