@@ -161,7 +161,6 @@ class SimpleCar:
                 break
 
         return safe
-
     
     def get_path(self, pos, route):
         """ Generate path according to route. """
