@@ -6,8 +6,15 @@
 
 In this project, we implemented car path planning with two algorithm configurations
 
-- RRT + Dubins Path (final shot)
-- Hybrid A* + Dubins Path (final shot)
+`
+Model_1
+├── RRT: branching
+└── Dubins path: final shot
+
+Model_2
+├── Hybrid A*: branching
+└── Dubins path: final shot
+`
 
 The car model is
 
