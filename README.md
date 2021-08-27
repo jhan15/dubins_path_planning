@@ -6,7 +6,7 @@
 
 In this project, we implemented car path planning with two algorithm configurations
 
-`
+```python
 Model_1
 ├── RRT: branching
 └── Dubins path: final shot
@@ -14,7 +14,7 @@ Model_1
 Model_2
 ├── Hybrid A*: branching
 └── Dubins path: final shot
-`
+```
 
 The car model is
 
