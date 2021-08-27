@@ -147,11 +147,13 @@ class HybridAstar:
 
             if count % check_dubins == 0:
                 solutions = self.dubins.find_tangents(best.pos, self.goal)
-                dubins_route, valid = self.dubins.best_tangent(solutions)
+                dubins_route, cost, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
                     route = self.backtracking(best) + dubins_route
                     path = self.car.get_path(self.start, route)
+                    cost += best.g
+                    print('Shortest path: {}'.format(round(cost, 2)))
                     print('Total iteration:', count)
                     
                     return path

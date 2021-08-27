@@ -102,7 +102,7 @@ class RRT:
 
             if count % self.check_dubins == 0:
                 solutions = self.dubins.find_tangents(nearest.pos, self.goal.pos)
-                dubins_route, valid = self.dubins.best_tangent(solutions)
+                dubins_route, cost, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
                     final_node = nearest

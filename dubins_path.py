@@ -194,7 +194,7 @@ class DubinsPath:
             if safe:
                 break
         
-        return route, safe
+        return route, s.len, safe
     
     def is_straight_route_safe(self, t1, t2):
         """ Check a straight route is safe. """
@@ -287,7 +287,7 @@ def main():
 
     t = time()
     solutions = dubins.find_tangents(car.start_pos, car.end_pos)
-    route, safe = dubins.best_tangent(solutions)
+    route, cost, safe = dubins.best_tangent(solutions)
 
     print('Total time: {}s'.format(round(time()-t, 3)))
 
