@@ -52,6 +52,9 @@ $ python3 dubins_path.py
 
 # pathfinding with RRT + Dubins Path (final shot)
 $ python3 rrt.py
+
+# pathfinding with hybrid a* + Dubins Path (final shot)
+$ python3 hybrid_astar.py
 ```
 
 ## Results
