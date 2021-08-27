@@ -4,7 +4,7 @@
 
 # dubins_path_planning
 
-In this project, we implemented car path planning with RRT, Hybrid A*, and Dubins Path algorithms. The car model is
+In this project, we implemented car path planning methods with RRT, Hybrid A*, and Dubins Path algorithms. The car model is
 
 <p align="center">
   <img src="https://github.com/jhan15/dubins_path_planning/blob/master/images/car_model.png?raw=true" width="300">
