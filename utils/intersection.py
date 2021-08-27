@@ -120,9 +120,9 @@ def polygons_overlapping(polya, polyb):
         for i in range(len(polygon)):
 
             j = (i + 1) % len(polygon)
-            line = [polygon[i], polygon[j]]
+            edge = [polygon[i], polygon[j]]
 
-            if separated(line, polya, polyb):
+            if separated(edge, polya, polyb):
                 return False
 
     return True
@@ -210,9 +210,9 @@ def rectangle_circle_overlapping(rect, circle):
     for i in range(len(rect)):
 
         j = (i + 1) % len(rect)
-        line = [rect[i], rect[j]]
+        edge = [rect[i], rect[j]]
 
-        result, _ = line_circle_intersected(line, circle)
+        result, _ = line_circle_intersected(edge, circle)
 
         if result:
             return True
@@ -228,9 +228,9 @@ def rectangle_arc_intersected(rect, arc):
     for i in range(len(rect)):
 
         j = (i + 1) % len(rect)
-        line = [rect[i], rect[j]]
+        edge = [rect[i], rect[j]]
 
-        result, nodes = line_circle_intersected(line, arc[:3])
+        result, nodes = line_circle_intersected(edge, arc[:3])
 
         if result:
             for node in nodes:
@@ -285,10 +285,10 @@ def rectangle_ringsector_intersected(rect, rs, edge=True):
 
     if rectangle_arc_intersected(rect, arc1):
         return True
-    
+
     if rectangle_arc_intersected(rect, arc2):
         return True
-    
+
     if edge:
         p1 = [rs[0] + rs[2]*cos(rs[4]), rs[1] + rs[2]*sin(rs[4])]
         p2 = [rs[0] + rs[3]*cos(rs[4]), rs[1] + rs[3]*sin(rs[4])]
