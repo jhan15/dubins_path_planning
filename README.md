@@ -26,18 +26,6 @@ The state variables are:
 The control variable is:
  - `phi ∈ [-pi/4, pi/4]`: steering angle (w.r.t. the direction of travel).
 
-The algorithms are:
-
-```bash
-Algorithm_1
-├── RRT: branching
-└── Dubins path: final shot
-
-Algorithm_2
-├── Hybrid A*: branching
-└── Dubins path: final shot
-```
-
 ## Usage
 
 ```bash
