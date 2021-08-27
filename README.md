@@ -4,14 +4,14 @@
 
 # dubins_path_planning
 
-In this project, we implemented car path planning with two algorithm configurations
+In this project, we implemented car path planning with [Rapidly exploring Random Tree (RRT)](https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree), Hybrid A*, and [Dubins Path](https://en.wikipedia.org/wiki/Dubins_path) algorithms.
 
 ```bash
-Model_1
+Algorithm_1
 ├── RRT: branching
 └── Dubins path: final shot
 
-Model_2
+Algorithm_2
 ├── Hybrid A*: branching
 └── Dubins path: final shot
 ```
