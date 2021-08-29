@@ -1,6 +1,6 @@
-from math import pi, tan
+from math import pi, tan, sqrt
 import matplotlib.pyplot as plt
-from matplotlib.collections import PatchCollection
+from matplotlib.collections import PatchCollection, LineCollection
 from matplotlib.patches import Rectangle
 import matplotlib.animation as animation
 import numpy as np
@@ -10,8 +10,9 @@ from car import SimpleCar
 from environment import Environment
 from dubins_path import DubinsPath
 from lookup import Lookup
+from astar import Astar
 from test_cases.cases import TestCase
-from utils.utils import distance, plot_a_car, get_discretized_thetas, round_theta
+from utils.utils import plot_a_car, get_discretized_thetas, round_theta, distance
 
 from time import time
 
@@ -26,7 +27,8 @@ class Node:
         self.g = None
         self.f = None
         self.parent = None
-        self.phi = None
+        self.phi = 0
+        self.branches = []
 
     def __eq__(self, other):
 
@@ -35,12 +37,12 @@ class Node:
     def __hash__(self):
 
         return hash((self.grid_pos))
-    
+
 
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40, dt=1e-2, t=2000):
+    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40, dt=1e-2, t=1):
         
         self.car = car
         self.grid = grid
@@ -58,6 +60,10 @@ class HybridAstar:
 
         self.dubins = DubinsPath(self.car)
         self.lookup = Lookup(self.car)
+        self.astar = Astar(self.grid, self.goal[:2])
+
+        self.extra_cost_steering = 0.3 * self.arc
+        self.extra_cost_turning = 0.2 * self.arc
 
         self.thetas = get_discretized_thetas(self.unit_theta)
     
@@ -73,27 +79,36 @@ class HybridAstar:
         theta = round_theta(theta, self.thetas)
         
         cell_id = self.grid.to_cell_id(pt)
-        grid_pos = cell_id.tolist() + [theta]
+        grid_pos = cell_id + [theta]
 
         node = Node(grid_pos, pos)
 
         return node
-        
-    def heuristic_cost(self, pos):
-        """ Heuristic for remaining cost estimation. """
-        
-        return distance(pos[:2], self.goal[:2])
+    
+    def simple_heuristic(self, pos):
+        """ Heuristic by Euclidean distance. """
 
-    def get_children(self, node):
+        return distance(pos[:2], self.goal[:2])
+        
+    def astar_heuristic(self, pos):
+        """ Heuristic by standard astar. """
+
+        cost = self.astar.search_path(pos[:2])
+        
+        return cost * self.grid.cell_size
+
+    def get_children(self, node, heu_type):
         """ Get successors from a state. """
 
         children = []
         for phi in self.phil:
 
             pos = node.pos
+            branch = [pos[:2]]
 
             for _ in range(self.drive_steps):
                 pos = self.car.step(pos, phi)
+                branch.append(pos[:2])
 
             # check safety of route-----------------------
             if phi == 0:
@@ -110,8 +125,22 @@ class HybridAstar:
             child.phi = phi
             child.parent = node
             child.g = node.g + self.arc
-            child.f = child.g + self.heuristic_cost(child.pos)
+
+            # extra cost for changing steering angle
+            if phi != node.phi:
+                child.g += self.extra_cost_steering
+            
+            # extra cost for turning
+            if phi != 0:
+                child.g += self.extra_cost_turning
+
+            if heu_type == 0:
+                child.f = child.g + self.simple_heuristic(child.pos)
+            if heu_type == 1:
+                child.f = child.g + self.astar_heuristic(child.pos)
+            
             children.append(child)
+            node.branches.append(branch)
 
         return children
     
@@ -124,12 +153,16 @@ class HybridAstar:
         
         return list(reversed(route))
     
-    def search_path(self):
+    def search_path(self, heu_type=1):
         """ Hybrid A* pathfinding. """
 
         root = self.construct_node(self.start, root=True)
         root.g = float(0)
-        root.f = root.g + self.heuristic_cost(root.pos)
+        
+        if heu_type == 0:
+            root.f = root.g + self.simple_heuristic(root.pos)
+        if heu_type == 1:
+            root.f = root.g + self.astar_heuristic(root.pos)
 
         closed_ = []
         open_ = [root]
@@ -156,9 +189,9 @@ class HybridAstar:
                     print('Shortest path: {}'.format(round(cost, 2)))
                     print('Total iteration:', count)
                     
-                    return path
+                    return path, closed_
 
-            children = self.get_children(best)
+            children = self.get_children(best, heu_type)
 
             for child in children:
 
@@ -172,25 +205,31 @@ class HybridAstar:
                     open_.remove(child)
                     open_.append(child)
 
-        return None
+        return None, None
 
 
-def main(grid_on=True):
+def main(grid_on=False):
 
     tc = TestCase()
 
-    env = Environment(tc.obs3)
+    env = Environment(tc.obs6)
 
-    car = SimpleCar(env, tc.start_pos, tc.end_pos)
+    car = SimpleCar(env, tc.start_pos, tc.end_pos, max_phi=pi/5)
 
     grid = Grid(env)
     
     hastar = HybridAstar(car, grid)
 
     t = time()
-    path = hastar.search_path()
-
+    path, closed_ = hastar.search_path()
     print('Total time: {}s'.format(round(time()-t, 3)))
+
+    branches = []
+    nodex, nodey = [], []
+    for node in closed_:
+        branches += node.branches
+        nodex.append(node.pos[0])
+        nodey.append(node.pos[1])
 
     if not path:
         print('No valid path!')
@@ -217,7 +256,7 @@ def main(grid_on=True):
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.tick_params(length=0)
-        plt.grid()
+        plt.grid(which='both')
     else:
         ax.set_xticks([])
         ax.set_yticks([])
@@ -227,6 +266,10 @@ def main(grid_on=True):
     
     ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
     ax = plot_a_car(ax, end_state.model)
+
+    lc = LineCollection(branches, color='y', linewidth=1)
+    ax.add_collection(lc)
+    ax.plot(nodex, nodey, 'ro', markersize=2)
 
     _path, = ax.plot([], [], color='lime', linewidth=1)
     _carl = PatchCollection([])
