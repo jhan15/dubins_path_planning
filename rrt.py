@@ -143,7 +143,7 @@ def main():
 
     tc = TestCase()
 
-    env = Environment(tc.obs5)
+    env = Environment(tc.obs)
 
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 

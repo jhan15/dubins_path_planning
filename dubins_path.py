@@ -276,9 +276,9 @@ def main():
 
     tc = TestCase()
 
-    env = Environment(tc.obs1)
+    env = Environment(tc.obs)
 
-    car = SimpleCar(env, tc.start_pos, tc.end_pos)
+    car = SimpleCar(env, tc.start_pos2, tc.end_pos2)
 
     dubins = DubinsPath(car)
 

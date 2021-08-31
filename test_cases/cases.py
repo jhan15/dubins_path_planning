@@ -15,8 +15,8 @@ class TestCase:
         # self.end_pos = [11.2, 1.2, 1.2*pi]
         # self.end_pos = [18.2, 1.2, 1.2*pi]
 
-        # self.start_pos = [6.2, 2.3, 1.3*pi]
-        # self.end_pos = [2.9, 7.6, -pi/5]
+        self.start_pos2 = [13.8, 1.5, -pi/5]
+        self.end_pos2 = [13, 5.3, 1.3*pi]
 
         self.obs = [
             [2, 7, 4.25, 0.25],

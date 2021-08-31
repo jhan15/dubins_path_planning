@@ -209,13 +209,14 @@ def main():
 
     # example controls to demonstrate car dynamics
     controls = [
-        (-pi/8, 150),
+        (-pi/8, 50),
         (0, 200),
+        (pi/8, 300),
         (-pi/8, 300),
-        (0, 300),
-        (pi/4, 100),
+        (0, 200),
         (-pi/4, 100),
-        (pi/4, 100)
+        (pi/4, 100),
+        (-pi/4, 100)
     ]
 
     path = car._get_path(car.start_pos, controls)
