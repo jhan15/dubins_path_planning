@@ -9,7 +9,6 @@ from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
 from dubins_path import DubinsPath
-from lookup import Lookup
 from utils.utils import distance, plot_a_car
 
 from time import time
@@ -50,7 +49,6 @@ class RRT:
         self.goal = Node(self.car.end_pos)
 
         self.dubins = DubinsPath(self.car)
-        self.lookup = Lookup(self.car)
     
     def get_nearest_node(self, nodes, pick):
         """ Get the nearest node of a random pick. """
@@ -75,6 +73,7 @@ class RRT:
         return phi
     
     def backtracking(self, node):
+        """ Backtracking the path. """
 
         route = []
         while node.parent:
@@ -96,7 +95,7 @@ class RRT:
             if count % self.pick_target == 0:
                 pick = self.goal.pos[:2]
             else:
-                pick = self.car.random_pos(self.lookup)[:2]
+                pick = self.car.random_pos()[:2]
             
             nearest = self.get_nearest_node(nodes, pick)
 
@@ -144,7 +143,7 @@ def main():
 
     tc = TestCase()
 
-    env = Environment(tc.obs3)
+    env = Environment(tc.obs5)
 
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 

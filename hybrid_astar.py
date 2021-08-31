@@ -4,15 +4,15 @@ from matplotlib.collections import PatchCollection, LineCollection
 from matplotlib.patches import Rectangle
 import matplotlib.animation as animation
 import numpy as np
+import argparse
 
 from grid import Grid
 from car import SimpleCar
 from environment import Environment
 from dubins_path import DubinsPath
-from lookup import Lookup
 from astar import Astar
 from test_cases.cases import TestCase
-from utils.utils import plot_a_car, get_discretized_thetas, round_theta, distance
+from utils.utils import plot_a_car, get_discretized_thetas, round_theta
 
 from time import time
 
@@ -25,6 +25,8 @@ class Node:
         self.grid_pos = grid_pos
         self.pos = pos
         self.g = None
+        self.g_ = None
+        self.h_ = None
         self.f = None
         self.parent = None
         self.phi = 0
@@ -42,41 +44,39 @@ class Node:
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, unit_theta=pi/12, drive_steps=40, dt=1e-2, t=1):
+    def __init__(self, car, grid, unit_theta=pi/36, dt=1e-2, check_dubins=1):
         
         self.car = car
         self.grid = grid
         self.unit_theta = unit_theta
-        self.drive_steps = drive_steps
         self.dt = dt
-        self.t = t
+        self.check_dubins = check_dubins
 
         self.start = self.car.start_pos
         self.goal = self.car.end_pos
 
         self.r = self.car.l / tan(self.car.max_phi)
+        self.drive_steps = int(sqrt(2)*self.grid.cell_size/self.dt) + 1
         self.arc = self.drive_steps * self.dt
         self.phil = [-self.car.max_phi, 0, self.car.max_phi]
 
         self.dubins = DubinsPath(self.car)
-        self.lookup = Lookup(self.car)
         self.astar = Astar(self.grid, self.goal[:2])
-
-        self.extra_cost_steering = 0.3 * self.arc
-        self.extra_cost_turning = 0.2 * self.arc
+        
+        self.w1 = 0.9
+        self.w2 = 0.1
+        self.w3 = 0.0
+        self.w4 = 0.0
 
         self.thetas = get_discretized_thetas(self.unit_theta)
     
-    def construct_node(self, pos, root=False):
+    def construct_node(self, pos):
         """ Create node for a pos. """
 
         theta = pos[2]
         pt = pos[:2]
 
-        if root:
-            theta = theta % (2*pi)
-        
-        theta = round_theta(theta, self.thetas)
+        theta = round_theta(theta % (2*pi), self.thetas)
         
         cell_id = self.grid.to_cell_id(pt)
         grid_pos = cell_id + [theta]
@@ -86,16 +86,17 @@ class HybridAstar:
         return node
     
     def simple_heuristic(self, pos):
-        """ Heuristic by Euclidean distance. """
+        """ Heuristic by Manhattan distance. """
 
-        return distance(pos[:2], self.goal[:2])
+        return abs(self.goal[0]-pos[0]) + abs(self.goal[1]-pos[1])
+        # return distance(self.goal[:2], pos[:2])
         
     def astar_heuristic(self, pos):
         """ Heuristic by standard astar. """
 
         cost = self.astar.search_path(pos[:2])
         
-        return cost * self.grid.cell_size
+        return self.w1*cost*self.grid.cell_size + self.w2*self.simple_heuristic(pos)
 
     def get_children(self, node, heu_type):
         """ Get successors from a state. """
@@ -125,14 +126,15 @@ class HybridAstar:
             child.phi = phi
             child.parent = node
             child.g = node.g + self.arc
+            child.g_ = node.g_ + self.arc
 
             # extra cost for changing steering angle
             if phi != node.phi:
-                child.g += self.extra_cost_steering
+                child.g += self.w3 * self.arc
             
             # extra cost for turning
             if phi != 0:
-                child.g += self.extra_cost_turning
+                child.g += self.w4 * self.arc
 
             if heu_type == 0:
                 child.f = child.g + self.simple_heuristic(child.pos)
@@ -144,7 +146,29 @@ class HybridAstar:
 
         return children
     
+    def best_final_shot(self, open_, closed_, best, cost, d_route, n=10):
+        """ Search best final shot in open set. """
+
+        open_.sort(key=lambda x: x.f, reverse=False)
+
+        for t in range(n):
+            best_ = open_[t]
+            solutions_ = self.dubins.find_tangents(best_.pos, self.goal)
+            d_route_, cost_, valid_ = self.dubins.best_tangent(solutions_)
+        
+            if valid_ and cost_ + best_.g_ < cost + best.g_:
+                best = best_
+                cost = cost_
+                d_route = d_route_
+        
+        if best in open_:
+            open_.remove(best)
+            closed_.append(best)
+        
+        return best, cost, d_route
+    
     def backtracking(self, node):
+        """ Backtracking the path. """
 
         route = []
         while node.parent:
@@ -156,8 +180,9 @@ class HybridAstar:
     def search_path(self, heu_type=1):
         """ Hybrid A* pathfinding. """
 
-        root = self.construct_node(self.start, root=True)
+        root = self.construct_node(self.start)
         root.g = float(0)
+        root.g_ = float(0)
         
         if heu_type == 0:
             root.f = root.g + self.simple_heuristic(root.pos)
@@ -169,23 +194,25 @@ class HybridAstar:
 
         count = 0
         while open_:
+            # print('-------------------------------------------------', count)
             count += 1
             best = min(open_, key=lambda x: x.f)
+
+            # print('best:', best.grid_pos, ', phi:', best.phi, ', g:', best.g, ', f:', best.f)
 
             open_.remove(best)
             closed_.append(best)
 
             # check dubins path
-            check_dubins = max(1, int(self.t/count))
-
-            if count % check_dubins == 0:
+            if count % self.check_dubins == 0:
                 solutions = self.dubins.find_tangents(best.pos, self.goal)
-                dubins_route, cost, valid = self.dubins.best_tangent(solutions)
+                d_route, cost, valid = self.dubins.best_tangent(solutions)
                 
                 if valid:
-                    route = self.backtracking(best) + dubins_route
+                    best, cost, d_route = self.best_final_shot(open_, closed_, best, cost, d_route)
+                    route = self.backtracking(best) + d_route
                     path = self.car.get_path(self.start, route)
-                    cost += best.g
+                    cost += best.g_
                     print('Shortest path: {}'.format(round(cost, 2)))
                     print('Total iteration:', count)
                     
@@ -198,6 +225,8 @@ class HybridAstar:
                 if child in closed_:
                     continue
 
+                # print('----> child:', child.grid_pos, ', pos:', child.pos[2], ', g:', child.g, ', f:', child.f)
+
                 if child not in open_:
                     open_.append(child)
 
@@ -208,11 +237,11 @@ class HybridAstar:
         return None, None
 
 
-def main(grid_on=False):
+def main(heu=1, grid_on=True):
 
     tc = TestCase()
 
-    env = Environment(tc.obs6)
+    env = Environment(tc.obs)
 
     car = SimpleCar(env, tc.start_pos, tc.end_pos, max_phi=pi/5)
 
@@ -221,7 +250,7 @@ def main(grid_on=False):
     hastar = HybridAstar(car, grid)
 
     t = time()
-    path, closed_ = hastar.search_path()
+    path, closed_ = hastar.search_path(heu)
     print('Total time: {}s'.format(round(time()-t, 3)))
 
     branches = []
@@ -304,4 +333,9 @@ def main(grid_on=False):
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--heu', type=int, default=1, help='heuristic type')
+    parser.add_argument('--grid_on', type=bool, default=True, help='show grid or not')
+    opt = parser.parse_args()
+
+    main(**vars(opt))

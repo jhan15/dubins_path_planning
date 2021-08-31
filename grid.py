@@ -56,7 +56,6 @@ class Grid:
         nbs = []
 
         for p in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            
             if 0 <= x + p[0] < self.n and 0 <= y + p[1] < self.m:
                 if self.grid[x + p[0]][y + p[1]] == 0:
                     nbs.append([x + p[0], y + p[1]])

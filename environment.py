@@ -5,7 +5,7 @@ from utils.intersection import rectangle_ringsector_intersected
 class Environment:
     """ The map configuration. """
 
-    def __init__(self, obs=None, lx=10, ly=10):
+    def __init__(self, obs=None, lx=20, ly=10):
 
         self.lx  = float(lx)
         self.ly  = float(ly)
@@ -15,7 +15,7 @@ class Environment:
         else:
             self.obs = []
     
-    def rectangle_inbounds(self, rect, safe_dis=0.1):
+    def rectangle_inbounds(self, rect, safe_dis=0.05):
         """ Check rectangle target within the map bounds. """
 
         for v in rect:
@@ -30,7 +30,7 @@ class Environment:
         
         return True
     
-    def ringsector_inbounds(self, rs, safe_dis=0.1):
+    def ringsector_inbounds(self, rs, safe_dis=0.05):
         """ Check ringsector target within the map bounds. """
 
         rect = [[0+safe_dis,        0+safe_dis],

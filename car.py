@@ -6,7 +6,6 @@ from matplotlib.collections import PatchCollection
 import matplotlib.animation as animation
 
 from environment import Environment
-from lookup import Lookup
 from test_cases.cases import TestCase
 from utils.utils import transform, same_point
 
@@ -46,7 +45,7 @@ class SimpleCar:
         else:
             self.end_pos = self.random_pos()
     
-    def random_pos(self, lookup):
+    def random_pos(self):
         """ Generate a random pos. """
         
         while True:
@@ -55,7 +54,7 @@ class SimpleCar:
             theta = uniform(-pi, pi)
             
             pos = [x, y, theta]
-            safe = self.is_pos_safe(pos, lookup)
+            safe = self.is_pos_safe(pos)
             
             if safe:
                 break
@@ -133,22 +132,22 @@ class SimpleCar:
 
         return [x, y, theta]
     
-    def is_pos_safe(self, pos, lookup):
-        """ Check pos safety by lookup table. """
+    def is_pos_safe(self, pos):
+        """ Check pos safety. """
 
-        lookup_vertex = lookup.transform_state(pos)
+        vertex = self.get_car_bounding(pos)
 
-        return self.env.rectangle_safe(lookup_vertex)
+        return self.env.rectangle_safe(vertex)
     
-    def is_route_safe(self, pos, route, lookup):
-        """ Check route safety by lookup table. """
+    def is_route_safe(self, pos, route):
+        """ Check route safety. """
 
         safe = True
 
         for goal, phi in route:
             while True:
                 pos = self.step(pos, phi)
-                safe = self.is_pos_safe(pos, lookup)
+                safe = self.is_pos_safe(pos)
 
                 if not safe:
                     break

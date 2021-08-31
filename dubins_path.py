@@ -8,7 +8,6 @@ import matplotlib.animation as animation
 from car import SimpleCar
 from environment import Environment
 from test_cases.cases import TestCase
-from lookup import Lookup
 from utils.utils import transform, directional_theta, plot_a_car, distance
 
 from time import time
@@ -41,8 +40,6 @@ class DubinsPath:
 
         self.car = car
         self.r = self.car.l / tan(self.car.max_phi)
-
-        self.lookup = Lookup(self.car)
         
         # turn left: 1, turn right: -1
         self.direction = {
@@ -214,7 +211,7 @@ class DubinsPath:
         #   3. inner ringsector
         #   4. outer ringsector
 
-        if not self.car.is_pos_safe(end_pos, self.lookup):
+        if not self.car.is_pos_safe(end_pos):
             return False
         
         rs_inner, rs_outer = self.construct_ringsectors(start_pos, end_pos, d, c, r)
@@ -235,7 +232,8 @@ class DubinsPath:
         delta_theta = end_pos[2] - theta
 
         p_inner = start_pos[:2]
-        p_outer = transform(x, y, 1.3*self.car.l, 0.4*self.car.l, theta, 1)
+        id = 1 if d == -1 else 2
+        p_outer = transform(x, y, 1.3*self.car.l, 0.4*self.car.l, theta, id)
 
         r_inner = r - self.car.carw / 2
         r_outer = distance(p_outer, c)

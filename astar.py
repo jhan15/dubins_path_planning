@@ -57,10 +57,12 @@ class Astar:
         self.table = []
     
     def heuristic(self, p1, p2):
+        """ Simple Manhattan distance  heuristic. """
 
-        return distance(p1, p2)
+        return abs(p2[0]-p1[0]) + abs(p2[1]-p1[1])
     
     def backtracking(self, node):
+        """ Backtracking the path. """
 
         route = []
         while node.parent:
@@ -72,6 +74,7 @@ class Astar:
         return list(reversed(route))
     
     def search_path(self, goal):
+        """ Search the path by astar. """
 
         goal = self.grid.to_cell_id(goal)
 
@@ -122,7 +125,7 @@ def main(grid_on=True):
 
     tc = TestCase()
 
-    env = Environment(tc.obs3)
+    env = Environment(tc.obs)
 
     grid = Grid(env)
 
