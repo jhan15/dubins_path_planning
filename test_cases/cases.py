@@ -7,13 +7,16 @@ class TestCase:
     def __init__(self):
 
         # self.start_pos = [6.2, 1.3, 1.2*pi]
-        self.start_pos = [1.5, 2.6, pi/6]
+        # self.start_pos = [1.5, 2.6, pi/6]
+        self.start_pos = [1.5, 1, pi/6]
         # self.end_pos = [2, 1.2, 1.2*pi]
-        # self.end_pos = [5, 8.1, 1.2*pi]
-        self.end_pos = [15.5, 7.8, pi]
+        self.end_pos = [5, 8.1, 1.2*pi]
+        # self.end_pos = [15.5, 7.8, pi]
         # self.end_pos = [9.2, 1.2, 1.2*pi]
         # self.end_pos = [11.2, 1.2, 1.2*pi]
         # self.end_pos = [18.2, 1.2, 1.2*pi]
+        # self.end_pos = [12.5, 8, pi/5]
+        # self.end_pos = [18.2, 4.5, pi]
 
         self.start_pos2 = [13.8, 1.5, -pi/5]
         self.end_pos2 = [13, 5.3, 1.3*pi]

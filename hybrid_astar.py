@@ -26,7 +26,6 @@ class Node:
         self.pos = pos
         self.g = None
         self.g_ = None
-        self.h_ = None
         self.f = None
         self.parent = None
         self.phi = 0
@@ -44,7 +43,7 @@ class Node:
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, unit_theta=pi/36, dt=1e-2, check_dubins=1):
+    def __init__(self, car, grid, unit_theta=pi/12, dt=1e-2, check_dubins=1):
         
         self.car = car
         self.grid = grid
@@ -63,10 +62,10 @@ class HybridAstar:
         self.dubins = DubinsPath(self.car)
         self.astar = Astar(self.grid, self.goal[:2])
         
-        self.w1 = 0.9
-        self.w2 = 0.1
-        self.w3 = 0.0
-        self.w4 = 0.0
+        self.w1 = 0.95 # weight for astar heuristic
+        self.w2 = 0.05 # weight for simple heuristic
+        self.w3 = 0.3  # weight for extra cost of steering angle change
+        self.w4 = 0.1  # weight for extra cost of turning
 
         self.thetas = get_discretized_thetas(self.unit_theta)
     
@@ -237,7 +236,7 @@ class HybridAstar:
         return None, None
 
 
-def main(heu=1, grid_on=True):
+def main(heu=1, grid_on=False):
 
     tc = TestCase()
 
@@ -335,7 +334,7 @@ def main(heu=1, grid_on=True):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--heu', type=int, default=1, help='heuristic type')
-    parser.add_argument('--grid_on', type=bool, default=True, help='show grid or not')
+    parser.add_argument('--grid_on', type=bool, default=False, help='show grid or not')
     opt = parser.parse_args()
 
     main(**vars(opt))
