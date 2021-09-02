@@ -42,7 +42,8 @@ $ python3 dubins_path.py
 $ python3 rrt.py
 
 # pathfinding with hybrid a* + Dubins Path (final shot)
-$ python3 hybrid_astar.py
+$ python3 hybrid_astar.py --heu 0 # simple heuristic
+                          --heu 1 # astar heuristic
 ```
 
 ## Results
@@ -63,4 +64,11 @@ $ python3 hybrid_astar.py
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131809755-9a8bc23c-2ba0-44a5-b417-5fdd12bd38e5.gif?raw=true">
+</p>
+
+**Simple heuristic vs. astar heuristic**
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/62132206/131811135-cf837e22-924b-4dd3-b47a-06ecf8b36236.png?raw=true" width="300">
+  <img src="https://user-images.githubusercontent.com/62132206/131811131-74093f80-d5a8-4127-8fdf-2ec614a1cb5c.png?raw=true" width="300">
 </p>
