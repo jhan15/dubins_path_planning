@@ -48,19 +48,19 @@ $ python3 hybrid_astar.py --heu 0 # simple heuristic
 
 ## Results
 
-#### Shortest obstacle-free Dubins Path
+### Shortest obstacle-free Dubins Path
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131809298-f4fde536-23a1-42b1-82ee-ddaf269708ae.gif?raw=true" width="300">
 </p>
 
-#### Pathfinding w/ RRT + Dubins Path
+### Pathfinding w/ RRT + Dubins Path
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131809295-34b14b96-6d79-4872-a853-11b02fa94592.gif?raw=true">
 </p>
 
-#### Pathfinding w/ Hybrid A* + Dubins Path
+### Pathfinding w/ Hybrid A* + Dubins Path
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131809755-9a8bc23c-2ba0-44a5-b417-5fdd12bd38e5.gif?raw=true">
