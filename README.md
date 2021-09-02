@@ -66,7 +66,9 @@ Pathfinding with RRT as branching and Dubins paths as final shot
 
 #### Hybrid A* + Dubins Path
 
-Pathfinding with Hybrid A* as branching and Dubins paths as final shot (no extra cost vs. extra cost for steering angle change and turning)
+Pathfinding with Hybrid A* as branching and Dubins paths as final shot
+(no extra cost vs. extra cost)
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131924165-a2145aa0-35d0-4d24-9df2-0a1d85460d1b.gif?raw=true">
   <img src="https://user-images.githubusercontent.com/62132206/131924168-64db34a3-77a1-435d-aadf-ce7268268ec7.gif?raw=true">
