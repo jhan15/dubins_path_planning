@@ -179,6 +179,8 @@ def main():
     ax = plot_a_car(ax, end_state.model)
 
     _path, = ax.plot([], [], color='lime', linewidth=1)
+    _path1, = ax.plot([], [], color='whitesmoke', linewidth=1)
+
     _carl = PatchCollection([])
     ax.add_collection(_carl)
     _car = PatchCollection([])
@@ -189,6 +191,7 @@ def main():
     def animate(i):
 
         _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
+        _path1.set_data(xl[:min(i+1, len(path))], yl[:min(i+1, len(path))])
 
         sub_carl = carl[:min(i+1, len(path))]
         _carl.set_paths(sub_carl[::20])
@@ -202,7 +205,7 @@ def main():
         _car.set_facecolor(facecolor)
         _car.set_zorder(3)
 
-        return _path, _carl, _car
+        return _path, _path1, _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
                                   repeat=False, blit=True)

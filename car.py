@@ -23,7 +23,7 @@ class State:
 class SimpleCar:
     """ Car model and functions. """
 
-    def __init__(self, env, start_pos=None, end_pos=None, l=0.5, max_phi=pi/4):
+    def __init__(self, env, start_pos=None, end_pos=None, l=0.5, max_phi=pi/5):
 
         self.env = env
         self.l = float(l)
@@ -214,9 +214,11 @@ def main():
         (pi/8, 300),
         (-pi/8, 300),
         (0, 200),
-        (-pi/4, 100),
-        (pi/4, 100),
-        (-pi/4, 100)
+        (-pi/5, 100),
+        (pi/5, 100),
+        (0, 400),
+        (pi/16, 200),
+        (-pi/16, 800)
     ]
 
     path = car._get_path(car.start_pos, controls)

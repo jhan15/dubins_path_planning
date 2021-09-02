@@ -193,11 +193,8 @@ class HybridAstar:
 
         count = 0
         while open_:
-            # print('-------------------------------------------------', count)
             count += 1
             best = min(open_, key=lambda x: x.f)
-
-            # print('best:', best.grid_pos, ', phi:', best.phi, ', g:', best.g, ', f:', best.f)
 
             open_.remove(best)
             closed_.append(best)
@@ -223,8 +220,6 @@ class HybridAstar:
 
                 if child in closed_:
                     continue
-
-                # print('----> child:', child.grid_pos, ', pos:', child.pos[2], ', g:', child.g, ', f:', child.f)
 
                 if child not in open_:
                     open_.append(child)
@@ -252,16 +247,17 @@ def main(heu=1, grid_on=False):
     path, closed_ = hastar.search_path(heu)
     print('Total time: {}s'.format(round(time()-t, 3)))
 
-    branches = []
-    nodex, nodey = [], []
-    for node in closed_:
-        branches += node.branches
-        nodex.append(node.pos[0])
-        nodey.append(node.pos[1])
-
     if not path:
         print('No valid path!')
         return
+    
+    branches = []
+    bnodex, bnodey = [], []
+    for node in closed_:
+        branches += node.branches
+        for _ in range(len(node.branches)):
+            bnodex.append(node.pos[0])
+            bnodey.append(node.pos[1])
 
     xl, yl = [], []
     carl = []
@@ -295,38 +291,61 @@ def main(heu=1, grid_on=False):
     ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
     ax = plot_a_car(ax, end_state.model)
 
-    lc = LineCollection(branches, color='y', linewidth=1)
-    ax.add_collection(lc)
-    ax.plot(nodex, nodey, 'ro', markersize=2)
+    _branches = LineCollection([], color='b', alpha=0.8, linewidth=1)
+    ax.add_collection(_branches)
+    _bnodes, = ax.plot([], [], 'ro', markersize=4)
 
-    _path, = ax.plot([], [], color='lime', linewidth=1)
+    _path, = ax.plot([], [], color='lime', linewidth=2)
+    _path1, = ax.plot([], [], color='whitesmoke', linewidth=2)
+
     _carl = PatchCollection([])
     ax.add_collection(_carl)
     _car = PatchCollection([])
     ax.add_collection(_car)
     
-    frames = len(path) + 1
+    frames = len(branches) + len(path) + 1
+
+    def init():
+        _branches.set_paths([])
+        _bnodes.set_data([], [])
+        _path.set_data([], [])
+        _path1.set_data([], [])
+        _carl.set_paths([])
+        _car.set_paths([])
+
+        return _branches, _bnodes, _path, _path1, _carl, _car
 
     def animate(i):
 
-        _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
+        if i < len(branches):
+            _branches.set_paths(branches[:i+1])
+            _bnodes.set_data(bnodex[:i+1], bnodey[:i+1])
+        
+        else:
+            _branches.set_paths(branches)
+            _bnodes.set_data(bnodex, bnodey)
 
-        sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::20])
-        _carl.set_color('m')
-        _carl.set_alpha(0.1)
+            j = i - len(branches)
 
-        edgecolor = ['k']*5 + ['r']
-        facecolor = ['y'] + ['k']*4 + ['r']
-        _car.set_paths(path[min(i, len(path)-1)].model)
-        _car.set_edgecolor(edgecolor)
-        _car.set_facecolor(facecolor)
-        _car.set_zorder(3)
+            _path.set_data(xl[min(j, len(path)-1):], yl[min(j, len(path)-1):])
+            _path1.set_data(xl[:min(j+1, len(path))], yl[:min(j+1, len(path))])
 
-        return _path, _carl, _car
+            sub_carl = carl[:min(j+1, len(path))]
+            _carl.set_paths(sub_carl[::20])
+            _carl.set_color('m')
+            _carl.set_alpha(0.1)
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
-                                  repeat=False, blit=True)
+            edgecolor = ['k']*5 + ['r']
+            facecolor = ['y'] + ['k']*4 + ['r']
+            _car.set_paths(path[min(j, len(path)-1)].model)
+            _car.set_edgecolor(edgecolor)
+            _car.set_facecolor(facecolor)
+            _car.set_zorder(3)
+
+        return _branches, _bnodes, _path, _path1, _carl, _car
+
+    ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames,
+                                  interval=1, repeat=False, blit=True)
 
     plt.show()
 
