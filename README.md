@@ -24,7 +24,7 @@ The state variables are:
  - `theta`: heading angle (direction of travel)
 
 The control variable is:
- - `phi ∈ [-pi/4, pi/4]`: steering angle (w.r.t. the direction of travel).
+ - `phi ∈ [-pi/5, pi/5]`: steering angle (w.r.t. the direction of travel).
 
 ## Usage
 
