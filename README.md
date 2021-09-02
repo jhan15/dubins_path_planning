@@ -62,5 +62,5 @@ $ python3 hybrid_astar.py
 #### Pathfinding w/ Hybrid A* + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131178320-4c993399-3121-4092-8061-09336b5e36f8.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/131802632-d916f409-def4-499c-941e-cbfaa1b6a0ce.gif?raw=true" width="500">
 </p>
