@@ -43,7 +43,7 @@ $ python3 rrt.py
 
 # pathfinding with Hybrid A* + Dubins Path (final shot)
 $ python3 hybrid_astar.py --heu 0 # simple heuristic
-                          --heu 1 # astar heuristic
+                          --heu 1 # A* heuristic
 ```
 
 ## Results
@@ -72,7 +72,7 @@ Pathfinding with Hybrid A* as branching and Dubins paths as final shot
   <img src="https://user-images.githubusercontent.com/62132206/131809755-9a8bc23c-2ba0-44a5-b417-5fdd12bd38e5.gif?raw=true">
 </p>
 
-Simple heuristic vs. astar heuristic
+Simple heuristic vs. A* heuristic
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/131811135-cf837e22-924b-4dd3-b47a-06ecf8b36236.png?raw=true" width="300">
