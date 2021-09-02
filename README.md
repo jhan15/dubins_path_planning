@@ -78,3 +78,8 @@ Simple heuristic vs. A* heuristic
   <img src="https://user-images.githubusercontent.com/62132206/131811135-cf837e22-924b-4dd3-b47a-06ecf8b36236.png?raw=true" width="300">
   <img src="https://user-images.githubusercontent.com/62132206/131811131-74093f80-d5a8-4127-8fdf-2ec614a1cb5c.png?raw=true" width="300">
 </p>
+
+![g3](https://user-images.githubusercontent.com/62132206/131924165-a2145aa0-35d0-4d24-9df2-0a1d85460d1b.gif)
+![g2](https://user-images.githubusercontent.com/62132206/131924166-94441f7c-3f55-40d1-b5a9-a5c04d9b191a.gif)
+![g1](https://user-images.githubusercontent.com/62132206/131924167-b09d1d31-0676-4fe2-8002-d2c251c1ef84.gif)
+![g4](https://user-images.githubusercontent.com/62132206/131924168-64db34a3-77a1-435d-aadf-ce7268268ec7.gif)
