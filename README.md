@@ -67,6 +67,7 @@ Pathfinding with RRT as branching and Dubins paths as final shot
 #### Hybrid A* + Dubins Path
 
 Pathfinding with Hybrid A* as branching and Dubins paths as final shot
+
 (no extra cost vs. extra cost)
 
 <p align="center">
