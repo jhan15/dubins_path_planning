@@ -353,7 +353,7 @@ def main():
 
         return _carl, _car
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=5,
+    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
                                   repeat=False, blit=True)
 
     plt.show()

@@ -209,16 +209,10 @@ def main():
 
     # example controls to demonstrate car dynamics
     controls = [
-        (-pi/8, 50),
+        (pi/8, 200),
         (0, 200),
-        (pi/8, 300),
-        (-pi/8, 300),
-        (0, 200),
-        (-pi/5, 100),
-        (pi/5, 100),
-        (0, 400),
-        (pi/16, 200),
-        (-pi/16, 800)
+        (pi/16, 600),
+        (-pi/8, 400)
     ]
 
     path = car._get_path(car.start_pos, controls)
@@ -269,7 +263,7 @@ def main():
 
         return _path, _carl, _car
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=5,
+    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
                                   repeat=False, blit=True)
 
     plt.show()

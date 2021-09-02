@@ -64,8 +64,8 @@ class HybridAstar:
         
         self.w1 = 0.95 # weight for astar heuristic
         self.w2 = 0.05 # weight for simple heuristic
-        self.w3 = 0.3  # weight for extra cost of steering angle change
-        self.w4 = 0.1  # weight for extra cost of turning
+        self.w3 = 0.40 # weight for extra cost of steering angle change
+        self.w4 = 0.20 # weight for extra cost of turning
 
         self.thetas = get_discretized_thetas(self.unit_theta)
     
@@ -88,16 +88,16 @@ class HybridAstar:
         """ Heuristic by Manhattan distance. """
 
         return abs(self.goal[0]-pos[0]) + abs(self.goal[1]-pos[1])
-        # return distance(self.goal[:2], pos[:2])
         
     def astar_heuristic(self, pos):
         """ Heuristic by standard astar. """
 
-        cost = self.astar.search_path(pos[:2])
+        h1 = self.astar.search_path(pos[:2]) * self.grid.cell_size
+        h2 = self.simple_heuristic(pos[:2])
         
-        return self.w1*cost*self.grid.cell_size + self.w2*self.simple_heuristic(pos)
+        return self.w1*h1 + self.w2*h2
 
-    def get_children(self, node, heu_type):
+    def get_children(self, node, heu, extra):
         """ Get successors from a state. """
 
         children = []
@@ -127,17 +127,18 @@ class HybridAstar:
             child.g = node.g + self.arc
             child.g_ = node.g_ + self.arc
 
-            # extra cost for changing steering angle
-            if phi != node.phi:
-                child.g += self.w3 * self.arc
-            
-            # extra cost for turning
-            if phi != 0:
-                child.g += self.w4 * self.arc
+            if extra:
+                # extra cost for changing steering angle
+                if phi != node.phi:
+                    child.g += self.w3 * self.arc
+                
+                # extra cost for turning
+                if phi != 0:
+                    child.g += self.w4 * self.arc
 
-            if heu_type == 0:
+            if heu == 0:
                 child.f = child.g + self.simple_heuristic(child.pos)
-            if heu_type == 1:
+            if heu == 1:
                 child.f = child.g + self.astar_heuristic(child.pos)
             
             children.append(child)
@@ -150,7 +151,7 @@ class HybridAstar:
 
         open_.sort(key=lambda x: x.f, reverse=False)
 
-        for t in range(n):
+        for t in range(min(n, len(open_))):
             best_ = open_[t]
             solutions_ = self.dubins.find_tangents(best_.pos, self.goal)
             d_route_, cost_, valid_ = self.dubins.best_tangent(solutions_)
@@ -176,16 +177,16 @@ class HybridAstar:
         
         return list(reversed(route))
     
-    def search_path(self, heu_type=1):
+    def search_path(self, heu=1, extra=False):
         """ Hybrid A* pathfinding. """
 
         root = self.construct_node(self.start)
         root.g = float(0)
         root.g_ = float(0)
         
-        if heu_type == 0:
+        if heu == 0:
             root.f = root.g + self.simple_heuristic(root.pos)
-        if heu_type == 1:
+        if heu == 1:
             root.f = root.g + self.astar_heuristic(root.pos)
 
         closed_ = []
@@ -214,7 +215,7 @@ class HybridAstar:
                     
                     return path, closed_
 
-            children = self.get_children(best, heu_type)
+            children = self.get_children(best, heu, extra)
 
             for child in children:
 
@@ -231,7 +232,7 @@ class HybridAstar:
         return None, None
 
 
-def main(heu=1, grid_on=False):
+def main(heu=1, extra=False, grid_on=False):
 
     tc = TestCase()
 
@@ -244,7 +245,7 @@ def main(heu=1, grid_on=False):
     hastar = HybridAstar(car, grid)
 
     t = time()
-    path, closed_ = hastar.search_path(heu)
+    path, closed_ = hastar.search_path(heu, extra)
     print('Total time: {}s'.format(round(time()-t, 3)))
 
     if not path:
@@ -293,13 +294,12 @@ def main(heu=1, grid_on=False):
 
     _branches = LineCollection([], color='b', alpha=0.8, linewidth=1)
     ax.add_collection(_branches)
-    _bnodes, = ax.plot([], [], 'ro', markersize=4)
+    _nodes, = ax.plot([], [], 'ro', markersize=3)
 
     _path, = ax.plot([], [], color='lime', linewidth=2)
-    _path1, = ax.plot([], [], color='whitesmoke', linewidth=2)
-
     _carl = PatchCollection([])
     ax.add_collection(_carl)
+    _path1, = ax.plot([], [], color='whitesmoke', linewidth=2)
     _car = PatchCollection([])
     ax.add_collection(_car)
     
@@ -307,33 +307,36 @@ def main(heu=1, grid_on=False):
 
     def init():
         _branches.set_paths([])
-        _bnodes.set_data([], [])
+        _nodes.set_data([], [])
         _path.set_data([], [])
-        _path1.set_data([], [])
         _carl.set_paths([])
+        _path1.set_data([], [])
         _car.set_paths([])
 
-        return _branches, _bnodes, _path, _path1, _carl, _car
+        return _branches, _nodes, _path, _carl, _path1, _car
 
     def animate(i):
 
         if i < len(branches):
             _branches.set_paths(branches[:i+1])
-            _bnodes.set_data(bnodex[:i+1], bnodey[:i+1])
+            _nodes.set_data(bnodex[:i+1], bnodey[:i+1])
         
         else:
             _branches.set_paths(branches)
-            _bnodes.set_data(bnodex, bnodey)
+            _nodes.set_data(bnodex, bnodey)
 
             j = i - len(branches)
 
             _path.set_data(xl[min(j, len(path)-1):], yl[min(j, len(path)-1):])
-            _path1.set_data(xl[:min(j+1, len(path))], yl[:min(j+1, len(path))])
 
             sub_carl = carl[:min(j+1, len(path))]
             _carl.set_paths(sub_carl[::20])
             _carl.set_color('m')
             _carl.set_alpha(0.1)
+            _carl.set_zorder(3)
+
+            _path1.set_data(xl[:min(j+1, len(path))], yl[:min(j+1, len(path))])
+            _path1.set_zorder(3)
 
             edgecolor = ['k']*5 + ['r']
             facecolor = ['y'] + ['k']*4 + ['r']
@@ -342,7 +345,7 @@ def main(heu=1, grid_on=False):
             _car.set_facecolor(facecolor)
             _car.set_zorder(3)
 
-        return _branches, _bnodes, _path, _path1, _carl, _car
+        return _branches, _nodes, _path, _carl, _path1, _car
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames,
                                   interval=1, repeat=False, blit=True)
@@ -353,6 +356,7 @@ def main(heu=1, grid_on=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--heu', type=int, default=1, help='heuristic type')
+    parser.add_argument('--extra', type=bool, default=False, help='add extra cost or not')
     parser.add_argument('--grid_on', type=bool, default=False, help='show grid or not')
     opt = parser.parse_args()
 
