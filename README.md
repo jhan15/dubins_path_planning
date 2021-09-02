@@ -61,7 +61,7 @@ Pick the shortest obstacle-free dubins path
 Pathfinding with RRT as branching and Dubins paths as final shot
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131809295-34b14b96-6d79-4872-a853-11b02fa94592.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/131825924-29873c9f-840d-427b-b3d3-c76c9e99b2d9.gif?raw=true">
 </p>
 
 #### Hybrid A* + Dubins Path
