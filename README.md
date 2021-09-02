@@ -53,7 +53,7 @@ $ python3 hybrid_astar.py --heu 0 # simple heuristic
 Pick the shortest obstacle-free dubins path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131809298-f4fde536-23a1-42b1-82ee-ddaf269708ae.gif?raw=true" width="300">
+  <img src="https://user-images.githubusercontent.com/62132206/131924167-b09d1d31-0676-4fe2-8002-d2c251c1ef84.gif?raw=true">
 </p>
 
 #### RRT + Dubins Path
@@ -61,15 +61,15 @@ Pick the shortest obstacle-free dubins path
 Pathfinding with RRT as branching and Dubins paths as final shot
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131825924-29873c9f-840d-427b-b3d3-c76c9e99b2d9.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/131924166-94441f7c-3f55-40d1-b5a9-a5c04d9b191a.gif?raw=true">
 </p>
 
 #### Hybrid A* + Dubins Path
 
-Pathfinding with Hybrid A* as branching and Dubins paths as final shot
-
+Pathfinding with Hybrid A* as branching and Dubins paths as final shot (no extra cost vs. extra cost for steering angle change and turning)
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131809755-9a8bc23c-2ba0-44a5-b417-5fdd12bd38e5.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/131924165-a2145aa0-35d0-4d24-9df2-0a1d85460d1b.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/131924168-64db34a3-77a1-435d-aadf-ce7268268ec7.gif?raw=true">
 </p>
 
 Simple heuristic vs. A* heuristic
@@ -78,8 +78,3 @@ Simple heuristic vs. A* heuristic
   <img src="https://user-images.githubusercontent.com/62132206/131811135-cf837e22-924b-4dd3-b47a-06ecf8b36236.png?raw=true" width="300">
   <img src="https://user-images.githubusercontent.com/62132206/131811131-74093f80-d5a8-4127-8fdf-2ec614a1cb5c.png?raw=true" width="300">
 </p>
-
-![g3](https://user-images.githubusercontent.com/62132206/131924165-a2145aa0-35d0-4d24-9df2-0a1d85460d1b.gif)
-![g2](https://user-images.githubusercontent.com/62132206/131924166-94441f7c-3f55-40d1-b5a9-a5c04d9b191a.gif)
-![g1](https://user-images.githubusercontent.com/62132206/131924167-b09d1d31-0676-4fe2-8002-d2c251c1ef84.gif)
-![g4](https://user-images.githubusercontent.com/62132206/131924168-64db34a3-77a1-435d-aadf-ce7268268ec7.gif)
