@@ -41,7 +41,7 @@ $ python3 dubins_path.py
 # pathfinding with RRT + Dubins Path (final shot)
 $ python3 rrt.py
 
-# pathfinding with hybrid a* + Dubins Path (final shot)
+# pathfinding with Hybrid A* + Dubins Path (final shot)
 $ python3 hybrid_astar.py --heu 0 # simple heuristic
                           --heu 1 # astar heuristic
 ```
