@@ -120,7 +120,7 @@ class DubinsPath:
         cline = self.rc2 - self.lc1
         R = np.linalg.norm(cline) / 2
 
-        if R < 2*self.r:
+        if R < self.r:
             return None
         
         theta = atan2(cline[1], cline[0]) - acos(self.r/R)
@@ -139,7 +139,7 @@ class DubinsPath:
         cline = self.lc2 - self.rc1
         R = np.linalg.norm(cline) / 2
 
-        if R < 2*self.r:
+        if R < self.r:
             return None
         
         theta = atan2(cline[1], cline[0]) + acos(self.r/R)
