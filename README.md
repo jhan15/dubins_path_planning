@@ -52,27 +52,20 @@ $ python3 hybrid_astar.py --heu 0 # simple heuristic
 Pick the shortest obstacle-free dubins path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131924167-b09d1d31-0676-4fe2-8002-d2c251c1ef84.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067554-12fd77aa-967a-4d41-ada6-c2d88ebc2bce.gif?raw=true">
 </p>
 
 #### RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131924166-94441f7c-3f55-40d1-b5a9-a5c04d9b191a.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067551-d9757bad-acf7-4005-884d-36709aaf1bc2.gif?raw=true">
 </p>
 
 #### Hybrid A* + Dubins Path
 
-No extra cost vs. extra cost (for changing steering angle and turning)
+No reversing vs. Reversing
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131924165-a2145aa0-35d0-4d24-9df2-0a1d85460d1b.gif?raw=true">
-  <img src="https://user-images.githubusercontent.com/62132206/131924168-64db34a3-77a1-435d-aadf-ce7268268ec7.gif?raw=true">
-</p>
-
-Simple heuristic vs. A* heuristic
-
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131964353-a6c6e81c-1fce-4672-bc71-bc99045a6a54.png?raw=true" width="600">
-  <img src="https://user-images.githubusercontent.com/62132206/131964348-a9776258-69db-46fc-86d9-b27df169e0b3.png?raw=true" width="600">
+  <img src="https://user-images.githubusercontent.com/62132206/132067546-a508cbe8-0031-4cf2-afc3-758f1104ebe8.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067538-f24867ff-74dc-42e8-90fe-2c45a2db7dca.gif?raw=true">
 </p>
