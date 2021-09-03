@@ -52,13 +52,13 @@ $ python3 hybrid_astar.py --heu 0 # simple heuristic
 Pick the shortest obstacle-free dubins path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067554-12fd77aa-967a-4d41-ada6-c2d88ebc2bce.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067554-12fd77aa-967a-4d41-ada6-c2d88ebc2bce.gif?raw=true" width="500">
 </p>
 
 #### RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067551-d9757bad-acf7-4005-884d-36709aaf1bc2.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067551-d9757bad-acf7-4005-884d-36709aaf1bc2.gif?raw=true" width="500">
 </p>
 
 #### Hybrid A* + Dubins Path
@@ -66,6 +66,6 @@ Pick the shortest obstacle-free dubins path
 No reversing vs. Reversing
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067546-a508cbe8-0031-4cf2-afc3-758f1104ebe8.gif?raw=true">
-  <img src="https://user-images.githubusercontent.com/62132206/132067538-f24867ff-74dc-42e8-90fe-2c45a2db7dca.gif?raw=true">
+  <img src="https://user-images.githubusercontent.com/62132206/132067546-a508cbe8-0031-4cf2-afc3-758f1104ebe8.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/132067538-f24867ff-74dc-42e8-90fe-2c45a2db7dca.gif?raw=true" width="500">
 </p>
