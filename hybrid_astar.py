@@ -265,7 +265,7 @@ class HybridAstar:
         return None, None
 
 
-def main(reverse=False, heu=1, extra=False, grid_on=False):
+def main(heu=1, reverse=False, extra=False, grid_on=False):
 
     tc = TestCase()
 
@@ -398,11 +398,11 @@ def main(reverse=False, heu=1, extra=False, grid_on=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--reverse', type=bool, default=False, help='allow reverse or not')
-    parser.add_argument('--heu', type=int, default=1, help='heuristic type')
-    parser.add_argument('--extra', type=bool, default=False, help='add extra cost or not')
-    parser.add_argument('--grid_on', type=bool, default=False, help='show grid or not')
-    opt = parser.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument('-heu', type=int, default=1, help='heuristic type')
+    p.add_argument('-r', action='store_true', help='allow reverse or not')
+    p.add_argument('-e', action='store_true', help='add extra cost or not')
+    p.add_argument('-g', action='store_true', help='show grid or not')
+    args = p.parse_args()
 
-    main(**vars(opt))
+    main(heu=args.heu, reverse=args.r, extra=args.e, grid_on=args.g)
