@@ -1,6 +1,3 @@
-![Screen Shot 2021-09-03 at 09 02 39](https://user-images.githubusercontent.com/62132206/131964301-976fad30-36a4-4037-a5ba-b220324ae3a8.png)
-![Screen Shot 2021-09-03 at 09 02 11](https://user-images.githubusercontent.com/62132206/131964306-1c9a3195-429c-4bda-9212-0f797a46b6b0.png)
-
 [![GitHub issues](https://img.shields.io/github/issues/jhan15/dubins_path_planning)](https://github.com/jhan15/dubins_path_planning/issues)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jhan15/dubins_path_planning?color=ff69b4)
 
