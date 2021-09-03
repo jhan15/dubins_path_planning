@@ -1,3 +1,5 @@
+![Screen Shot 2021-09-03 at 09 02 39](https://user-images.githubusercontent.com/62132206/131964301-976fad30-36a4-4037-a5ba-b220324ae3a8.png)
+![Screen Shot 2021-09-03 at 09 02 11](https://user-images.githubusercontent.com/62132206/131964306-1c9a3195-429c-4bda-9212-0f797a46b6b0.png)
 
 [![GitHub issues](https://img.shields.io/github/issues/jhan15/dubins_path_planning)](https://github.com/jhan15/dubins_path_planning/issues)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jhan15/dubins_path_planning?color=ff69b4)
@@ -74,6 +76,6 @@ No extra cost vs. extra cost (for changing steering angle and turning)
 Simple heuristic vs. A* heuristic
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/131811135-cf837e22-924b-4dd3-b47a-06ecf8b36236.png?raw=true" width="300">
-  <img src="https://user-images.githubusercontent.com/62132206/131811131-74093f80-d5a8-4127-8fdf-2ec614a1cb5c.png?raw=true" width="300">
+  <img src="https://user-images.githubusercontent.com/62132206/131964353-a6c6e81c-1fce-4672-bc71-bc99045a6a54.png?raw=true" width="600">
+  <img src="https://user-images.githubusercontent.com/62132206/131964348-a9776258-69db-46fc-86d9-b27df169e0b3.png?raw=true" width="600">
 </p>
