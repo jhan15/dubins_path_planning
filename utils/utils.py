@@ -78,7 +78,7 @@ def same_point(pt1, pt2, h=1e-2):
 def round_theta(theta, thetas):
     """ Round theta to closest discretized value. """
 
-    return min(thetas, key=lambda x: abs(x-theta))
+    return min(thetas, key=lambda x: abs(x-theta) % (2*pi))
 
 
 def get_discretized_thetas(unit_theta):
@@ -88,7 +88,7 @@ def get_discretized_thetas(unit_theta):
 
     while True:
         theta = thetas[-1] + unit_theta
-        if theta > 2*pi:
+        if theta > (2*pi - unit_theta):
             break
         
         thetas.append(theta)

@@ -78,7 +78,7 @@ class RRT:
 
         route = []
         while node.parent:
-            route.append((node.pos, node.phi))
+            route.append((node.pos, node.phi, 1))
             node = node.parent
         
         return list(reversed(route))
@@ -159,6 +159,8 @@ def main():
 
     print('Total time: {}s'.format(round(time()-t, 3)))
 
+    path = path[::5] + [path[-1]]
+
     nodes = nodes[1:]
     branches = []
     nodex, nodey = [], []
@@ -167,7 +169,7 @@ def main():
         branches.append(node.branch)
         nodex.append(node.pos[0])
         nodey.append(node.pos[1])
-
+    
     xl, yl = [], []
     carl = []
     for i in range(len(path)):
@@ -229,7 +231,7 @@ def main():
             _path.set_data(xl[min(j, len(path)-1):], yl[min(j, len(path)-1):])
 
             sub_carl = carl[:min(j+1, len(path))]
-            _carl.set_paths(sub_carl[::20])
+            _carl.set_paths(sub_carl[::4])
             _carl.set_color('m')
             _carl.set_alpha(0.1)
             _carl.set_zorder(3)

@@ -4,6 +4,7 @@ from matplotlib.collections import PatchCollection, LineCollection
 from matplotlib.patches import Rectangle
 import matplotlib.animation as animation
 import numpy as np
+from itertools import product
 import argparse
 
 from grid import Grid
@@ -12,7 +13,7 @@ from environment import Environment
 from dubins_path import DubinsPath
 from astar import Astar
 from test_cases.cases import TestCase
-from utils.utils import plot_a_car, get_discretized_thetas, round_theta
+from utils.utils import plot_a_car, get_discretized_thetas, round_theta, same_point
 
 from time import time
 
@@ -29,6 +30,7 @@ class Node:
         self.f = None
         self.parent = None
         self.phi = 0
+        self.m = None
         self.branches = []
 
     def __eq__(self, other):
@@ -43,10 +45,11 @@ class Node:
 class HybridAstar:
     """ Hybrid A* search procedure. """
 
-    def __init__(self, car, grid, unit_theta=pi/12, dt=1e-2, check_dubins=1):
+    def __init__(self, car, grid, reverse, unit_theta=pi/12, dt=1e-2, check_dubins=1):
         
         self.car = car
         self.grid = grid
+        self.reverse = reverse
         self.unit_theta = unit_theta
         self.dt = dt
         self.check_dubins = check_dubins
@@ -58,14 +61,21 @@ class HybridAstar:
         self.drive_steps = int(sqrt(2)*self.grid.cell_size/self.dt) + 1
         self.arc = self.drive_steps * self.dt
         self.phil = [-self.car.max_phi, 0, self.car.max_phi]
+        self.ml = [1, -1]
+
+        if reverse:
+            self.comb = list(product(self.ml, self.phil))
+        else:
+            self.comb = list(product([1], self.phil))
 
         self.dubins = DubinsPath(self.car)
         self.astar = Astar(self.grid, self.goal[:2])
         
         self.w1 = 0.95 # weight for astar heuristic
         self.w2 = 0.05 # weight for simple heuristic
-        self.w3 = 0.40 # weight for extra cost of steering angle change
-        self.w4 = 0.20 # weight for extra cost of turning
+        self.w3 = 0.30 # weight for extra cost of steering angle change
+        self.w4 = 0.10 # weight for extra cost of turning
+        self.w5 = 2.00 # weight for extra cost of reversing
 
         self.thetas = get_discretized_thetas(self.unit_theta)
     
@@ -101,21 +111,30 @@ class HybridAstar:
         """ Get successors from a state. """
 
         children = []
-        for phi in self.phil:
+        for m, phi in self.comb:
+
+            # don't go back
+            if node.m and node.phi == phi and node.m*m == -1:
+                continue
+
+            if node.m and node.m == 1 and m == -1:
+                continue
 
             pos = node.pos
-            branch = [pos[:2]]
+            branch = [m, pos[:2]]
 
             for _ in range(self.drive_steps):
-                pos = self.car.step(pos, phi)
+                pos = self.car.step(pos, phi, m)
                 branch.append(pos[:2])
 
             # check safety of route-----------------------
+            pos1 = node.pos if m == 1 else pos
+            pos2 = pos if m == 1 else node.pos
             if phi == 0:
-                safe = self.dubins.is_straight_route_safe(node.pos, pos)
+                safe = self.dubins.is_straight_route_safe(pos1, pos2)
             else:
-                d, c, r = self.car.get_params(node.pos, phi)
-                safe = self.dubins.is_turning_route_safe(node.pos, pos, d, c, r)
+                d, c, r = self.car.get_params(pos1, phi)
+                safe = self.dubins.is_turning_route_safe(pos1, pos2, d, c, r)
             # --------------------------------------------
             
             if not safe:
@@ -123,6 +142,7 @@ class HybridAstar:
             
             child = self.construct_node(pos)
             child.phi = phi
+            child.m = m
             child.parent = node
             child.g = node.g + self.arc
             child.g_ = node.g_ + self.arc
@@ -135,14 +155,17 @@ class HybridAstar:
                 # extra cost for turning
                 if phi != 0:
                     child.g += self.w4 * self.arc
+                
+                # extra cost for reverse
+                if m == -1:
+                    child.g += self.w5 * self.arc
 
             if heu == 0:
                 child.f = child.g + self.simple_heuristic(child.pos)
             if heu == 1:
                 child.f = child.g + self.astar_heuristic(child.pos)
             
-            children.append(child)
-            node.branches.append(branch)
+            children.append([child, branch])
 
         return children
     
@@ -172,7 +195,7 @@ class HybridAstar:
 
         route = []
         while node.parent:
-            route.append((node.pos, node.phi))
+            route.append((node.pos, node.phi, node.m))
             node = node.parent
         
         return list(reversed(route))
@@ -217,32 +240,42 @@ class HybridAstar:
 
             children = self.get_children(best, heu, extra)
 
-            for child in children:
+            for child, branch in children:
 
                 if child in closed_:
                     continue
 
                 if child not in open_:
+                    best.branches.append(branch)
                     open_.append(child)
 
                 elif child.g < open_[open_.index(child)].g:
+                    best.branches.append(branch)
+
+                    c = open_[open_.index(child)]
+                    p = c.parent
+                    for b in p.branches:
+                        if same_point(b[-1], c.pos[:2]):
+                            p.branches.remove(b)
+                            break
+                    
                     open_.remove(child)
                     open_.append(child)
 
         return None, None
 
 
-def main(heu=1, extra=False, grid_on=False):
+def main(reverse=False, heu=1, extra=False, grid_on=False):
 
     tc = TestCase()
 
     env = Environment(tc.obs)
 
-    car = SimpleCar(env, tc.start_pos, tc.end_pos, max_phi=pi/5)
+    car = SimpleCar(env, tc.start_pos, tc.end_pos)
 
     grid = Grid(env)
     
-    hastar = HybridAstar(car, grid)
+    hastar = HybridAstar(car, grid, reverse)
 
     t = time()
     path, closed_ = hastar.search_path(heu, extra)
@@ -251,14 +284,15 @@ def main(heu=1, extra=False, grid_on=False):
     if not path:
         print('No valid path!')
         return
+
+    path = path[::5] + [path[-1]]
     
     branches = []
-    bnodex, bnodey = [], []
+    bcolors = []
     for node in closed_:
-        branches += node.branches
-        for _ in range(len(node.branches)):
-            bnodex.append(node.pos[0])
-            bnodey.append(node.pos[1])
+        for b in node.branches:
+            branches.append(b[1:])
+            bcolors.append('y' if b[0] == 1 else 'b')
 
     xl, yl = [], []
     carl = []
@@ -267,6 +301,7 @@ def main(heu=1, extra=False, grid_on=False):
         yl.append(path[i].pos[1])
         carl.append(path[i].model[0])
 
+    start_state = car.get_car_state(car.start_pos)
     end_state = car.get_car_state(car.end_pos)
 
     # plot and annimation
@@ -289,17 +324,25 @@ def main(heu=1, extra=False, grid_on=False):
     for ob in env.obs:
         ax.add_patch(Rectangle((ob.x, ob.y), ob.w, ob.h, fc='gray', ec='k'))
     
-    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
+    ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=6)
     ax = plot_a_car(ax, end_state.model)
 
-    _branches = LineCollection([], color='b', alpha=0.8, linewidth=1)
+    # _branches = LineCollection(branches, color='b', alpha=0.8, linewidth=1)
+    # ax.add_collection(_branches)
+
+    # _carl = PatchCollection(carl[::20], color='m', alpha=0.1, zorder=3)
+    # ax.add_collection(_carl)
+    # ax.plot(xl, yl, color='whitesmoke', linewidth=2, zorder=3)
+    # _car = PatchCollection(path[-1].model, match_original=True, zorder=4)
+    # ax.add_collection(_car)
+
+    _branches = LineCollection([], linewidth=1)
     ax.add_collection(_branches)
-    _nodes, = ax.plot([], [], 'ro', markersize=3)
 
     _path, = ax.plot([], [], color='lime', linewidth=2)
     _carl = PatchCollection([])
     ax.add_collection(_carl)
-    _path1, = ax.plot([], [], color='whitesmoke', linewidth=2)
+    _path1, = ax.plot([], [], color='w', linewidth=2)
     _car = PatchCollection([])
     ax.add_collection(_car)
     
@@ -307,45 +350,45 @@ def main(heu=1, extra=False, grid_on=False):
 
     def init():
         _branches.set_paths([])
-        _nodes.set_data([], [])
         _path.set_data([], [])
         _carl.set_paths([])
         _path1.set_data([], [])
         _car.set_paths([])
 
-        return _branches, _nodes, _path, _carl, _path1, _car
+        return _branches, _path, _carl, _path1, _car
 
     def animate(i):
 
+        edgecolor = ['k']*5 + ['r']
+        facecolor = ['y'] + ['k']*4 + ['r']
+
         if i < len(branches):
             _branches.set_paths(branches[:i+1])
-            _nodes.set_data(bnodex[:i+1], bnodey[:i+1])
+            _branches.set_color(bcolors)
         
         else:
             _branches.set_paths(branches)
-            _nodes.set_data(bnodex, bnodey)
 
             j = i - len(branches)
 
             _path.set_data(xl[min(j, len(path)-1):], yl[min(j, len(path)-1):])
 
             sub_carl = carl[:min(j+1, len(path))]
-            _carl.set_paths(sub_carl[::20])
-            _carl.set_color('m')
+            _carl.set_paths(sub_carl[::4])
+            _carl.set_edgecolor('k')
+            _carl.set_facecolor('m')
             _carl.set_alpha(0.1)
             _carl.set_zorder(3)
 
             _path1.set_data(xl[:min(j+1, len(path))], yl[:min(j+1, len(path))])
             _path1.set_zorder(3)
 
-            edgecolor = ['k']*5 + ['r']
-            facecolor = ['y'] + ['k']*4 + ['r']
             _car.set_paths(path[min(j, len(path)-1)].model)
             _car.set_edgecolor(edgecolor)
             _car.set_facecolor(facecolor)
             _car.set_zorder(3)
 
-        return _branches, _nodes, _path, _carl, _path1, _car
+        return _branches, _path, _carl, _path1, _car
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames,
                                   interval=1, repeat=False, blit=True)
@@ -355,6 +398,7 @@ def main(heu=1, extra=False, grid_on=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--reverse', type=bool, default=False, help='allow reverse or not')
     parser.add_argument('--heu', type=int, default=1, help='heuristic type')
     parser.add_argument('--extra', type=bool, default=False, help='add extra cost or not')
     parser.add_argument('--grid_on', type=bool, default=False, help='show grid or not')

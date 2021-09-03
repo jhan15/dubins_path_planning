@@ -171,6 +171,9 @@ class DubinsPath:
 
         pos0 = self.start_pos
         pos1 = self.end_pos
+
+        if not solutions:
+            return None, None, False
         
         for s in solutions:
             route = self.get_route(s)
@@ -268,8 +271,9 @@ class DubinsPath:
 
         phil = [phi1, 0, phi2]
         goal = [s.t1, s.t2, self.end_pos]
+        ml = [1, 1, 1]
         
-        return list(zip(goal, phil))
+        return list(zip(goal, phil, ml))
 
 
 def main():
@@ -293,6 +297,8 @@ def main():
         return
 
     path = car.get_path(car.start_pos, route)
+
+    path = path[::5] + [path[-1]]
 
     carl = []
     for i in range(len(path)):
@@ -340,7 +346,7 @@ def main():
     def animate(i):
 
         sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::20])
+        _carl.set_paths(sub_carl[::4])
         _carl.set_color('m')
         _carl.set_alpha(0.1)
 

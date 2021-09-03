@@ -118,7 +118,7 @@ class SimpleCar:
 
         return state
     
-    def step(self, pos, phi, dt=1e-2):
+    def step(self, pos, phi, m=1, dt=1e-2):
         """ Car dynamics. """
 
         x, y, theta = pos
@@ -126,9 +126,9 @@ class SimpleCar:
         dy     = sin(theta)
         dtheta = tan(phi) / self.l
 
-        x     += dt*dx
-        y     += dt*dy
-        theta += dt*dtheta
+        x     += m*dt*dx
+        y     += m*dt*dy
+        theta += m*dt*dtheta
 
         return [x, y, theta]
     
@@ -144,9 +144,9 @@ class SimpleCar:
 
         safe = True
 
-        for goal, phi in route:
+        for goal, phi, m in route:
             while True:
-                pos = self.step(pos, phi)
+                pos = self.step(pos, phi, m)
                 safe = self.is_pos_safe(pos)
 
                 if not safe:
@@ -166,12 +166,12 @@ class SimpleCar:
 
         path = []
 
-        for goal, phi in route:
+        for goal, phi, m in route:
             while True:
                 car_state = self.get_car_state(pos, phi)
                 path.append(car_state)
 
-                pos = self.step(pos, phi)
+                pos = self.step(pos, phi, m)
 
                 if same_point(pos[:2], goal[:2]):
                     pos = goal
@@ -187,11 +187,11 @@ class SimpleCar:
         
         path = []
 
-        for phi, steps in controls:
+        for phi, m, steps in controls:
             for _ in range(steps):
                 car_state = self.get_car_state(pos, phi)
                 path.append(car_state)
-                pos = self.step(pos, phi)
+                pos = self.step(pos, phi, m)
         
         car_state = self.get_car_state(pos, phi)
         path.append(car_state)
@@ -209,13 +209,13 @@ def main():
 
     # example controls to demonstrate car dynamics
     controls = [
-        (pi/8, 200),
-        (0, 200),
-        (pi/16, 600),
-        (-pi/8, 400)
+        (pi/8, 1, 150),
+        (0, 1, 200)
     ]
 
     path = car._get_path(car.start_pos, controls)
+
+    path = path[::5] + [path[-1]]
 
     xl, yl = [], []
     carl = []
@@ -250,7 +250,7 @@ def main():
         _path.set_data(xl[min(i, len(path)-1):], yl[min(i, len(path)-1):])
 
         sub_carl = carl[:min(i+1, len(path))]
-        _carl.set_paths(sub_carl[::20])
+        _carl.set_paths(sub_carl[::4])
         _carl.set_color('m')
         _carl.set_alpha(0.1)
 
