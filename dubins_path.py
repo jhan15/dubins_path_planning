@@ -360,7 +360,7 @@ def main():
         return _carl, _car
 
     ani = animation.FuncAnimation(fig, animate, frames=frames, interval=1,
-                                  repeat=False, blit=True)
+                                  repeat=True, blit=True)
 
     plt.show()
 

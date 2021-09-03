@@ -178,6 +178,7 @@ def main():
         carl.append(path[i].model[0])
 
     end_state = car.get_car_state(car.end_pos)
+    start_state = car.get_car_state(car.start_pos)
 
     # plot and annimation
     fig, ax = plt.subplots(figsize=(6,6))
@@ -192,6 +193,7 @@ def main():
     
     ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=5)
     ax = plot_a_car(ax, end_state.model)
+    ax = plot_a_car(ax, start_state.model)
 
     _branches = LineCollection([], color='b', alpha=0.8, linewidth=1)
     ax.add_collection(_branches)
@@ -249,7 +251,7 @@ def main():
         return _branches, _nodes, _path, _carl, _path1, _car
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames, 
-                                  interval=1, repeat=False, blit=True)
+                                  interval=1, repeat=True, blit=True)
 
     plt.show()
 

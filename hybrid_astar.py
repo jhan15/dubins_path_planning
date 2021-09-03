@@ -326,6 +326,7 @@ def main(reverse=False, heu=1, extra=False, grid_on=False):
     
     ax.plot(car.start_pos[0], car.start_pos[1], 'ro', markersize=6)
     ax = plot_a_car(ax, end_state.model)
+    ax = plot_a_car(ax, start_state.model)
 
     # _branches = LineCollection(branches, color='b', alpha=0.8, linewidth=1)
     # ax.add_collection(_branches)
@@ -391,7 +392,7 @@ def main(reverse=False, heu=1, extra=False, grid_on=False):
         return _branches, _path, _carl, _path1, _car
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames,
-                                  interval=1, repeat=False, blit=True)
+                                  interval=1, repeat=True, blit=True)
 
     plt.show()
 
