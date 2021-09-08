@@ -57,7 +57,7 @@ Pick the shortest obstacle-free dubins path
 #### RRT + Dubins Path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067551-d9757bad-acf7-4005-884d-36709aaf1bc2.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/132485976-f1b545b8-4358-4e55-b73c-c65b9ff6c02d.gif?raw=true" width="500">
 </p>
 
 #### Hybrid A* + Dubins Path
@@ -65,6 +65,6 @@ Pick the shortest obstacle-free dubins path
 No reversing vs. Reversing
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067546-a508cbe8-0031-4cf2-afc3-758f1104ebe8.gif?raw=true" width="500">
-  <img src="https://user-images.githubusercontent.com/62132206/132067538-f24867ff-74dc-42e8-90fe-2c45a2db7dca.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/132485964-0c66ec2c-b8e8-4fdc-bf05-785b87a69320.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/132485946-9f0005d9-8aca-4a30-b0fa-94ef0fbdc06b.gif?raw=true" width="500">
 </p>
