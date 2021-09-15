@@ -51,7 +51,7 @@ $ python3 hybrid_astar.py -heu 1 -r -e # A* heuristic + reverse + extra cost
 Pick the shortest obstacle-free dubins path
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/62132206/132067554-12fd77aa-967a-4d41-ada6-c2d88ebc2bce.gif?raw=true" width="500">
+  <img src="https://user-images.githubusercontent.com/62132206/133502943-b42a77ee-5152-43f3-9891-0c488773a05b.gif?raw=true" width="500">
 </p>
 
 #### RRT + Dubins Path
