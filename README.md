@@ -62,13 +62,13 @@ Pick the shortest obstacle-free dubins path
 
 #### Hybrid A* + Dubins Path
 
-W/O reversing
+w/o reversing
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/132485964-0c66ec2c-b8e8-4fdc-bf05-785b87a69320.gif?raw=true" width="500">
 </p>
 
-W/ reversing
+w/ reversing
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/62132206/132485946-9f0005d9-8aca-4a30-b0fa-94ef0fbdc06b.gif?raw=true" width="500">
