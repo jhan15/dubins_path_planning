@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 import matplotlib.animation as animation
 
-from environment import Environment
+from comps.environment import Environment
 from test_cases.cases import TestCase
 from utils.utils import transform, same_point
 

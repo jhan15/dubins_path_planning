@@ -7,11 +7,11 @@ import numpy as np
 from itertools import product
 import argparse
 
-from grid import Grid
+from comps.grid import Grid
 from car import SimpleCar
-from environment import Environment
+from comps.environment import Environment
 from dubins_path import DubinsPath
-from astar import Astar
+from utils.astar import Astar
 from test_cases.cases import TestCase
 from utils.utils import plot_a_car, get_discretized_thetas, round_theta, same_point
 
@@ -19,7 +19,7 @@ from time import time
 
 
 class Node:
-    """ Hybrid A* tree node. """
+    """ Hybrid A* tree node. """
 
     def __init__(self, grid_pos, pos):
 

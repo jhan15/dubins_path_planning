@@ -6,7 +6,7 @@ from matplotlib.patches import Rectangle
 import matplotlib.animation as animation
 
 from car import SimpleCar
-from environment import Environment
+from comps.environment import Environment
 from test_cases.cases import TestCase
 from dubins_path import DubinsPath
 from utils.utils import distance, plot_a_car

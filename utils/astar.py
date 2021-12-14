@@ -3,8 +3,8 @@ from matplotlib.collections import LineCollection
 from matplotlib.patches import Rectangle
 import numpy as np
 
-from grid import Grid
-from environment import Environment
+from comps.grid import Grid
+from comps.environment import Environment
 from test_cases.cases import TestCase
 from utils.utils import distance
 

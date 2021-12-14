@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 from test_cases.cases import TestCase
-from environment import Environment
+from comps.environment import Environment
 
 
 class Grid:

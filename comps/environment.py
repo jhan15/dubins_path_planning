@@ -1,4 +1,4 @@
-from obstacle import Obstacle
+from comps.obstacle import Obstacle
 from utils.intersection import rectangle_ringsector_intersected
 
 
