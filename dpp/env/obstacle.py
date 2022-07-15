@@ -1,4 +1,4 @@
-from utils.intersection import polygons_overlapping, rectangle_ringsector_intersected
+from dpp.utils.intersection import polygons_overlapping, rectangle_ringsector_intersected
 
 
 class Obstacle:

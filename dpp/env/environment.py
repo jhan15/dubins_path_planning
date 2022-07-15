@@ -1,5 +1,5 @@
-from comps.obstacle import Obstacle
-from utils.intersection import rectangle_ringsector_intersected
+from dpp.env.obstacle import Obstacle
+from dpp.utils.intersection import rectangle_ringsector_intersected
 
 
 class Environment:

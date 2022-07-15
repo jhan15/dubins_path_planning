@@ -3,8 +3,8 @@ from math import sqrt
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
-from test_cases.cases import TestCase
-from comps.environment import Environment
+from dpp.test_cases.cases import TestCase
+from dpp.env.environment import Environment
 
 
 class Grid:
